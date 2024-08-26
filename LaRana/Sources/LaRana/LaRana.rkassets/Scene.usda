@@ -12,7 +12,21 @@ def Xform "Root"
 {
     def "reduced" (
         active = true
+        customData = {
+            float3 rotationEulerHint = (0, 1.919862, 0)
+        }
         prepend references = @reduced.usdz@
+    )
+    {
+        quatf xformOp:orient = (0.57357645, 0, 0.819152, 0)
+        float3 xformOp:scale = (0.2, 0.2, 0.2)
+        float3 xformOp:translate = (0, 0.62, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+
+    def "table" (
+        active = true
+        prepend references = @table.usdz@
     )
     {
         float3 xformOp:scale = (1, 1, 1)
