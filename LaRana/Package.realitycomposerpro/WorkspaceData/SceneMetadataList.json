@@ -4,7 +4,7 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "reduced"
+        "Materials"
       ],
       {
         "isExpanded" : true,
@@ -13,6 +13,55 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "reduced"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials",
+        "Material_Wood"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "Coin"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials",
+        "Material_Turf"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table"
       ],
       {
         "isExpanded" : true,

@@ -10,15 +10,16 @@
 
 def Xform "Root"
 {
+    reorder nameChildren = ["reduced", "table", "Materials", "Coin"]
     def "reduced" (
         active = true
         customData = {
-            float3 rotationEulerHint = (0, 1.919862, 0)
+            float3 rotationEulerHint = (0, 0.34906587, 0)
         }
-        prepend references = @reduced.usdz@
+        references = @reduced.usdz@
     )
     {
-        quatf xformOp:orient = (0.57357645, 0, 0.819152, 0)
+        quatf xformOp:orient = (0.9848077, 0, 0.17364818, 0)
         float3 xformOp:scale = (0.2, 0.2, 0.2)
         float3 xformOp:translate = (0, 0.62, 0)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
@@ -26,11 +27,627 @@ def Xform "Root"
 
     def "table" (
         active = true
-        prepend references = @table.usdz@
+        customData = {
+            float3 rotationEulerHint = (0, -1.5707963, 0)
+        }
+        references = @table.usdz@
     )
     {
+        reorder nameChildren = ["Materials", "Geom", "Material_Turf_1"]
+        quatf xformOp:orient = (0.70710677, 0, -0.70710677, 0)
         float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0, 0, 0)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        over "Materials"
+        {
+            reorder nameChildren = ["Material_Transparent", "Material_Turf", "Material_Wood"]
+            over "Material_Transparent"
+            {
+                token outputs:mtlx:surface
+                token outputs:realitykit:vertex
+
+                over "surfaceShader"
+                {
+                    float inputs:occlusion = 1
+                    float inputs:opacity = 0
+                    float inputs:opacityThreshold
+                }
+            }
+
+            over "Material_Turf"
+            {
+                token inputs:frame:stPrimvarName = "st"
+                token outputs:mtlx:surface.connect = </Root/table/Materials/Material_Turf/PreviewSurface.outputs:out>
+                token outputs:realitykit:vertex
+                token outputs:surface.connect = </Root/table/Materials/Material_Turf/surfaceShader.outputs:surface>
+                float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (0, 109.5)
+                float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
+
+                over "surfaceShader" (
+                    active = true
+                )
+                {
+                    color3f inputs:diffuseColor = (0.04547659, 0.31259865, 0.030280374) (
+                        colorSpace = "srgb_displayp3"
+                    )
+                    color3f inputs:diffuseColor.connect = </Root/table/Materials/Material_Turf/diffuseColor.outputs:rgb>
+                    normal3f inputs:normal = (0, 0, 1)
+                    normal3f inputs:normal.connect = </Root/table/Materials/Material_Turf/normal.outputs:rgb>
+                    float inputs:occlusion = 1
+                    float inputs:occlusion.connect = </Root/table/Materials/Material_Turf/occlusion.outputs:r>
+                    float inputs:roughness = 0.8
+                    float inputs:roughness.connect = None
+                }
+
+                def Shader "PreviewSurface" (
+                    active = false
+                )
+                {
+                    uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                    color3f inputs:diffuseColor.connect = </Root/table/Materials/Material_Turf/Ramplr.outputs:out>
+                    float inputs:metallic
+                    float3 inputs:normal
+                    float inputs:opacity
+                    float inputs:roughness
+                    token outputs:out
+                    float2 ui:nodegraph:node:pos = (-255, 105)
+                    float2 ui:nodegraph:node:size = (148.5, 199)
+                    int ui:nodegraph:node:stackingOrder = 17
+                    string[] ui:nodegraph:realitykit:node:attributesShowingChildren = []
+                }
+
+                def Shader "Ramplr"
+                {
+                    uniform token info:id = "ND_ramplr_color3"
+                    float2 inputs:texcoord = (0, 0)
+                    color3f inputs:valuel = (1, 1, 1) (
+                        colorSpace = "srgb_displayp3"
+                    )
+                    color3f inputs:valuer
+                    color3f outputs:out
+                    float2 ui:nodegraph:node:pos = (-508.16016, 79.20703)
+                    float2 ui:nodegraph:node:size = (148.5, 145)
+                    int ui:nodegraph:node:stackingOrder = 45
+                    string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["inputs:texcoord"]
+                }
+
+                def Shader "diffuseColor"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @Moss_Ground_baseColor.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Turf/diffuseColor/TexCoordReader.outputs:result>
+                    color3f outputs:rgb
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Turf/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+
+                def Shader "roughness"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @TH_Moss_Plaster_Rough_roughness.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Turf/roughness/TexCoordReader.outputs:result>
+                    float outputs:r
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Turf/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+
+                def Shader "normal"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @Moss_Ground_normal.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Turf/normal/TexCoordReader.outputs:result>
+                    normal3f outputs:rgb
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Turf/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+
+                def Shader "occlusion"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @Moss_Ground_mask.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Turf/occlusion/TexCoordReader.outputs:result>
+                    float outputs:r
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Turf/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+            }
+
+            over "Material_Wood"
+            {
+                token inputs:frame:stPrimvarName = "st"
+                token outputs:mtlx:surface.connect = </Root/table/Materials/Material_Wood/PreviewSurface.outputs:out>
+                token outputs:realitykit:vertex
+                token outputs:surface.connect = </Root/table/Materials/Material_Wood/surfaceShader.outputs:surface>
+                float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (0, 109.5)
+                float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
+
+                over "surfaceShader" (
+                    active = true
+                )
+                {
+                    color3f inputs:diffuseColor = (0.9063318, 0.7155201, 0.46741065) (
+                        colorSpace = "srgb_displayp3"
+                    )
+                    color3f inputs:diffuseColor.connect = </Root/table/Materials/Material_Wood/diffuseColor.outputs:rgb>
+                    normal3f inputs:normal = (0, 0, 1)
+                    normal3f inputs:normal.connect = </Root/table/Materials/Material_Wood/normal.outputs:rgb>
+                    float inputs:occlusion = 1
+                    float inputs:occlusion.connect = </Root/table/Materials/Material_Wood/occlusion.outputs:r>
+                }
+
+                def Shader "PreviewSurface" (
+                    active = false
+                )
+                {
+                    uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                    color3f inputs:diffuseColor
+                    float inputs:metallic
+                    float inputs:roughness
+                    token outputs:out
+                    float2 ui:nodegraph:node:pos = (-255, 105)
+                    float2 ui:nodegraph:node:size = (148.5, 199)
+                }
+
+                def Shader "diffuseColor"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @Galloway_Brown_Oak_baseColor.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Wood/diffuseColor/TexCoordReader.outputs:result>
+                    color3f outputs:rgb
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Wood/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+
+                def Shader "normal"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @Galloway_Brown_Oak_Normal.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Wood/normal/TexCoordReader.outputs:result>
+                    normal3f outputs:rgb
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Wood/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+
+                def Shader "occlusion"
+                {
+                    uniform token info:id = "UsdUVTexture"
+                    asset inputs:file = @Galloway_Brown_Oak_Mask.png@
+                    float2 inputs:st.connect = </Root/table/Materials/Material_Wood/occlusion/TexCoordReader.outputs:result>
+                    float outputs:r
+
+                    def Shader "TexCoordReader"
+                    {
+                        uniform token info:id = "UsdPrimvarReader_float2"
+                        token inputs:varname.connect = </Root/table/Materials/Material_Wood/surfaceShader.inputs:frame:stPrimvarName>
+                        float2 outputs:result
+                    }
+                }
+            }
+        }
+
+        over "Geom"
+        {
+            over "Table_Cube_004" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "WallLeft_Cube_007" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "WallRight_Cube_006" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "Back_Cube_005" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegFrontLeft_Cube_001" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegFrontRight_Cube" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegRearLeft_Cube_003" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegRearRight_Cube_002" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "SupportLowerCenter_Cube_010" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "SupportLowerFront_Cube_008" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "SupportLowerRear_Cube_009" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteFront_Cube_011" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteLeft_Cube_014" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteRight_Cube_013" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteSlope_Cube_012" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+        }
+    }
+
+    def Xform "Materials" (
+        active = true
+    )
+    {
+        reorder nameChildren = ["Material_Turf", "Material_Wood", "CoinMaterial"]
+        def Material "Material_Turf" (
+            references = </Root/table/Materials/Material_Turf>
+        )
+        {
+            token outputs:surface.connect = </Root/Materials/Material_Turf/surfaceShader.outputs:surface>
+
+            def Shader "surfaceShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
+                delete color3f inputs:diffuseColor.connect = </Root/Materials/Material_Turf/diffuseColor.outputs:rgb>
+                prepend color3f inputs:diffuseColor.connect = </Root/Materials/Material_Turf/diffuseColor.outputs:rgb>
+                delete normal3f inputs:normal.connect = </Root/Materials/Material_Turf/normal.outputs:rgb>
+                prepend normal3f inputs:normal.connect = </Root/Materials/Material_Turf/normal.outputs:rgb>
+                delete float inputs:occlusion.connect = </Root/Materials/Material_Turf/occlusion.outputs:r>
+                prepend float inputs:occlusion.connect = </Root/Materials/Material_Turf/occlusion.outputs:r>
+                token outputs:surface
+            }
+
+            over "diffuseColor"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Moss_Ground_1k_8b_Yhgmr2E/textures/Moss_Ground_baseColor.png@
+            }
+
+            over "normal"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Moss_Ground_1k_8b_Yhgmr2E/textures/Moss_Ground_normal.png@
+            }
+
+            over "occlusion"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Moss_Ground_1k_8b_Yhgmr2E/textures/Moss_Ground_mask.png@
+            }
+        }
+
+        def Material "Material_Wood" (
+            references = </Root/table/Materials/Material_Wood>
+        )
+        {
+            token outputs:surface.connect = </Root/Materials/Material_Wood/surfaceShader.outputs:surface>
+
+            def Shader "surfaceShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
+                delete color3f inputs:diffuseColor.connect = </Root/Materials/Material_Wood/diffuseColor.outputs:rgb>
+                prepend color3f inputs:diffuseColor.connect = </Root/Materials/Material_Wood/diffuseColor.outputs:rgb>
+                delete normal3f inputs:normal.connect = </Root/Materials/Material_Wood/normal.outputs:rgb>
+                prepend normal3f inputs:normal.connect = </Root/Materials/Material_Wood/normal.outputs:rgb>
+                delete float inputs:occlusion.connect = </Root/Materials/Material_Wood/occlusion.outputs:r>
+                prepend float inputs:occlusion.connect = </Root/Materials/Material_Wood/occlusion.outputs:r>
+                token outputs:surface
+            }
+
+            over "diffuseColor"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Galloway_Brown_Oak_1k_8b_XOvGchd/textures/Galloway_Brown_Oak_baseColor.png@
+            }
+
+            over "normal"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Galloway_Brown_Oak_1k_8b_XOvGchd/textures/Galloway_Brown_Oak_Normal.png@
+            }
+
+            over "occlusion"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Galloway_Brown_Oak_1k_8b_XOvGchd/textures/Galloway_Brown_Oak_Mask.png@
+            }
+        }
+
+        def Material "CoinMaterial"
+        {
+            token inputs:frame:stPrimvarName = "st"
+            token outputs:mtlx:surface
+            token outputs:realitykit:vertex
+            prepend token outputs:surface.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.outputs:surface>
+
+            def Shader "DefaultSurfaceShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (1, 1, 1)
+                color3f inputs:diffuseColor.connect = </Root/Materials/CoinMaterial/diffuseColor.outputs:rgb>
+                float inputs:metallic = 0
+                float inputs:metallic.connect = </Root/Materials/CoinMaterial/metallic.outputs:r>
+                normal3f inputs:normal = (0, 0, 1)
+                normal3f inputs:normal.connect = </Root/Materials/CoinMaterial/normal.outputs:rgb>
+                float inputs:occlusion = 1
+                float inputs:occlusion.connect = </Root/Materials/CoinMaterial/occlusion.outputs:r>
+                float inputs:roughness = 0.75
+                float inputs:roughness.connect = </Root/Materials/CoinMaterial/roughness.outputs:r>
+                token outputs:surface
+            }
+
+            def Shader "diffuseColor"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_diffuse.png@
+                float2 inputs:st.connect = </Root/Materials/CoinMaterial/diffuseColor/TexCoordReader.outputs:result>
+                color3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "roughness"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_roughness.png@
+                float2 inputs:st.connect = </Root/Materials/CoinMaterial/roughness/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "metallic"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_metallic.png@
+                float2 inputs:st.connect = </Root/Materials/CoinMaterial/metallic/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "normal"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_normal.png@
+                float2 inputs:st.connect = </Root/Materials/CoinMaterial/normal/TexCoordReader.outputs:result>
+                normal3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "occlusion"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_mask.png@
+                float2 inputs:st.connect = </Root/Materials/CoinMaterial/occlusion/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+        }
+    }
+
+    def Cylinder "Coin" (
+        active = true
+        prepend apiSchemas = ["MaterialBindingAPI"]
+        customData = {
+            float3 rotationEulerHint = (0, 0, 0)
+        }
+    )
+    {
+        uniform token axis = "Y"
+        double height = 0.005
+        rel material:binding = </Root/Materials/CoinMaterial> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        double radius = 0.015
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0, 0.5, 2)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def RealityKitComponent "RigidBody"
+        {
+            uniform token info:id = "RealityKit.RigidBody"
+
+            def RealityKitStruct "massFrame"
+            {
+                def RealityKitStruct "m_pose"
+                {
+                }
+            }
+
+            def RealityKitStruct "material"
+            {
+            }
+        }
+
+        def RealityKitComponent "MotionState"
+        {
+            uniform token info:id = "RealityKit.MotionState"
+            float3 m_userSetLinearVelocity = (0, 5, -5)
+            uint m_userSetLinearVelocityVersion = 1
+        }
+
+        def RealityKitComponent "VFXEmitter"
+        {
+            uniform token info:id = "RealityKit.VFXEmitter"
+
+            def RealityKitStruct "currentState"
+            {
+                token birthDirection = "Normal"
+                int64 burstCount = 1000
+                int64 burstCountVariation = 0
+                token emitterShape = "Sphere"
+                float radialAmount = 6.28
+                float3 shapeSize = (0.1, 0.1, 0.1)
+
+                def RealityKitStruct "mainEmitter"
+                {
+                    float4 endColorA = (1, 0.059511222, 0.042311408, 1)
+                    float4 endColorB = (1, 1, 1, 1)
+                    float spreadingAngle = 10
+                    float4 startColorA = (0.031896025, 0.6795424, 0.07036009, 1)
+                    float4 startColorB = (1, 1, 1, 1)
+                    bool useEndColor = 1
+                    bool useEndColorRange = 0
+                    bool useStartColorRange = 0
+                }
+
+                def RealityKitStruct "spawnedEmitter"
+                {
+                }
+            }
+        }
     }
 }
 
