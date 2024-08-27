@@ -15,6 +15,7 @@
 		8AD85B662C7E550900537BB7 /* JuegoDeLaRanaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B652C7E550900537BB7 /* JuegoDeLaRanaUITests.swift */; };
 		8AD85B682C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */; };
 		8AD85B752C7E7DFA00537BB7 /* Scene.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B742C7E7DF900537BB7 /* Scene.usdz */; };
+		8AD85B772C7E817700537BB7 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B762C7E817700537BB7 /* OverlayView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		8AD85B652C7E550900537BB7 /* JuegoDeLaRanaUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JuegoDeLaRanaUITests.swift; sourceTree = "<group>"; };
 		8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JuegoDeLaRanaUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		8AD85B742C7E7DF900537BB7 /* Scene.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Scene.usdz; sourceTree = "<group>"; };
+		8AD85B762C7E817700537BB7 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +101,7 @@
 				8AD85B742C7E7DF900537BB7 /* Scene.usdz */,
 				8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */,
 				8AD85B4C2C7E550600537BB7 /* ContentView.swift */,
+				8AD85B762C7E817700537BB7 /* OverlayView.swift */,
 				8AD85B4E2C7E550800537BB7 /* Assets.xcassets */,
 				8AD85B502C7E550800537BB7 /* Preview Content */,
 			);
@@ -261,6 +264,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AD85B772C7E817700537BB7 /* OverlayView.swift in Sources */,
 				8AD85B4D2C7E550600537BB7 /* ContentView.swift in Sources */,
 				8AD85B4B2C7E550600537BB7 /* AppDelegate.swift in Sources */,
 			);
