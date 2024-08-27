@@ -3,15 +3,6 @@
     "objectMetadataList" : [
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
-        "Root",
-        "Materials"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root"
       ],
       {
@@ -21,7 +12,19 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "reduced"
+        "Materials",
+        "Green_Felt_Fabric"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials",
+        "Material_Turf"
       ],
       {
         "isExpanded" : true,
@@ -51,8 +54,18 @@
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
         "table",
+        "Geom",
+        "ChuteLeft_Cube_014"
+      ],
+      {
+        "isExpanded" : false,
+        "isLocked" : true
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
         "Materials",
-        "Material_Turf"
+        "MaplePlywood"
       ],
       {
         "isExpanded" : true,
@@ -62,6 +75,44 @@
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
         "table"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "Materials",
+        "RandomMaterial"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "reduced"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "Materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Geom"
       ],
       {
         "isExpanded" : true,

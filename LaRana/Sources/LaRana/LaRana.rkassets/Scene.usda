@@ -10,7 +10,7 @@
 
 def Xform "Root"
 {
-    reorder nameChildren = ["reduced", "table", "Materials", "Coin"]
+    reorder nameChildren = ["reduced", "table", "Materials", "Coin", "Gray_Felt_Fabric"]
     def "reduced" (
         active = true
         customData = {
@@ -262,7 +262,7 @@ def Xform "Root"
                 prepend apiSchemas = ["MaterialBindingAPI"]
             )
             {
-                rel material:binding = </Root/Materials/Material_Turf> (
+                rel material:binding = </Root/Materials/RandomMaterial> (
                     bindMaterialAs = "weakerThanDescendants"
                 )
             }
@@ -271,7 +271,7 @@ def Xform "Root"
                 prepend apiSchemas = ["MaterialBindingAPI"]
             )
             {
-                rel material:binding = </Root/Materials/Material_Turf> (
+                rel material:binding = </Root/Materials/RandomMaterial> (
                     bindMaterialAs = "weakerThanDescendants"
                 )
             }
@@ -280,7 +280,7 @@ def Xform "Root"
                 prepend apiSchemas = ["MaterialBindingAPI"]
             )
             {
-                rel material:binding = </Root/Materials/Material_Turf> (
+                rel material:binding = </Root/Materials/RandomMaterial> (
                     bindMaterialAs = "weakerThanDescendants"
                 )
             }
@@ -289,7 +289,7 @@ def Xform "Root"
                 prepend apiSchemas = ["MaterialBindingAPI"]
             )
             {
-                rel material:binding = </Root/Materials/Material_Turf> (
+                rel material:binding = </Root/Materials/RandomMaterial> (
                     bindMaterialAs = "weakerThanDescendants"
                 )
             }
@@ -392,6 +392,92 @@ def Xform "Root"
                     bindMaterialAs = "weakerThanDescendants"
                 )
             }
+
+            over "Hole_Cylinder"
+            {
+                float3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            over "TableBackTurf_Cube_016" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+                float3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            over "TableMainTurf_Cube_017" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+                float3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            over "TableWallLeftTurf_Cube_018" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+                float3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            over "TableWallRightTurf_Cube_019" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+                float3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+
+            over "TableWallLeft_Cube_007" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableWallRight_Cube_006" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableBack_Cube_005" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableMain_Cube_015" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Material_Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
         }
     }
 
@@ -399,12 +485,20 @@ def Xform "Root"
         active = true
     )
     {
-        reorder nameChildren = ["Material_Turf", "Material_Wood", "CoinMaterial"]
+        reorder nameChildren = ["Light_Blue_Denim_Fabric", "Material_Turf", "Material_Wood", "CoinMaterial", "RandomMaterial", "MaplePlywood", "Green_Felt_Fabric"]
         def Material "Material_Turf" (
             references = </Root/table/Materials/Material_Turf>
         )
         {
+            token inputs:frame:stPrimvarName (
+                customData = {
+                    dictionary realitykit = {
+                        float2 sizeInSubgraph = (203.5, 53)
+                    }
+                }
+            )
             token outputs:surface.connect = </Root/Materials/Material_Turf/surfaceShader.outputs:surface>
+            float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
 
             def Shader "surfaceShader"
             {
@@ -412,29 +506,59 @@ def Xform "Root"
                 color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
                 delete color3f inputs:diffuseColor.connect = </Root/Materials/Material_Turf/diffuseColor.outputs:rgb>
                 prepend color3f inputs:diffuseColor.connect = </Root/Materials/Material_Turf/diffuseColor.outputs:rgb>
+                float inputs:metallic = 0
+                float inputs:metallic.connect = None
                 delete normal3f inputs:normal.connect = </Root/Materials/Material_Turf/normal.outputs:rgb>
                 prepend normal3f inputs:normal.connect = </Root/Materials/Material_Turf/normal.outputs:rgb>
                 delete float inputs:occlusion.connect = </Root/Materials/Material_Turf/occlusion.outputs:r>
                 prepend float inputs:occlusion.connect = </Root/Materials/Material_Turf/occlusion.outputs:r>
+                float inputs:roughness = 0.6
+                delete float inputs:roughness.connect = </Root/Materials/Material_Turf/roughness.outputs:r>
                 token outputs:surface
             }
 
             over "diffuseColor"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Moss_Ground_1k_8b_Yhgmr2E/textures/Moss_Ground_baseColor.png@
+                asset inputs:file = @Khaki_Green_Linen_Fabric_2k_8b_HvMAbo0/textures/Khaki_Green_Linen_Fabric_baseColor.png@
             }
 
             over "normal"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Moss_Ground_1k_8b_Yhgmr2E/textures/Moss_Ground_normal.png@
+                asset inputs:file = @Khaki_Green_Linen_Fabric_2k_8b_HvMAbo0/textures/Khaki_Green_Linen_Fabric_baseColor.png@
             }
 
             over "occlusion"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Moss_Ground_1k_8b_Yhgmr2E/textures/Moss_Ground_mask.png@
+                asset inputs:file = @Khaki_Green_Linen_Fabric_2k_8b_HvMAbo0/textures/Khaki_Green_Linen_Fabric_Mask.png@
+            }
+
+            over "roughness"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Grass003_1K-JPG/Grass003_1K-JPG_Roughness.jpg@
+            }
+
+            over "Ramplr"
+            {
+                float2 ui:nodegraph:node:size = (148.5, 145)
+            }
+
+            def Shader "metallic"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @grassy-meadow1-bl/grassy-meadow1_metallic.png@
+                float2 inputs:st.connect = </Root/Materials/Material_Turf/metallic/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Material_Turf/surfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
             }
         }
 
@@ -450,38 +574,81 @@ def Xform "Root"
                 color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
                 delete color3f inputs:diffuseColor.connect = </Root/Materials/Material_Wood/diffuseColor.outputs:rgb>
                 prepend color3f inputs:diffuseColor.connect = </Root/Materials/Material_Wood/diffuseColor.outputs:rgb>
+                float inputs:metallic = 0
+                float inputs:metallic.connect = None
                 delete normal3f inputs:normal.connect = </Root/Materials/Material_Wood/normal.outputs:rgb>
                 prepend normal3f inputs:normal.connect = </Root/Materials/Material_Wood/normal.outputs:rgb>
                 delete float inputs:occlusion.connect = </Root/Materials/Material_Wood/occlusion.outputs:r>
                 prepend float inputs:occlusion.connect = </Root/Materials/Material_Wood/occlusion.outputs:r>
+                float inputs:roughness = 0.5
+                float inputs:roughness.connect = None
                 token outputs:surface
             }
 
             over "diffuseColor"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Galloway_Brown_Oak_1k_8b_XOvGchd/textures/Galloway_Brown_Oak_baseColor.png@
+                asset inputs:file = @Wood_Beech_Raw_1k_8b_15wmoo4/textures/Wood_Beech_Raw_baseColor.png@
             }
 
             over "normal"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Galloway_Brown_Oak_1k_8b_XOvGchd/textures/Galloway_Brown_Oak_Normal.png@
+                asset inputs:file = @Wood_Beech_Raw_1k_8b_15wmoo4/textures/Wood_Beech_Raw_normal.png@
             }
 
             over "occlusion"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Galloway_Brown_Oak_1k_8b_XOvGchd/textures/Galloway_Brown_Oak_Mask.png@
+                asset inputs:file = @Wood_Beech_Raw_1k_8b_15wmoo4/textures/Wood_Beech_Raw_mask.png@
+            }
+
+            def Shader "roughness"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @bare-wood1-bl/bare-wood1_roughness.png@
+                float2 inputs:st.connect = </Root/Materials/Material_Wood/roughness/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Material_Wood/surfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "metallic"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @bare-wood1-bl/bare-wood1_metallic.png@
+                float2 inputs:st.connect = </Root/Materials/Material_Wood/metallic/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Material_Wood/surfaceShader.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
             }
         }
 
         def Material "CoinMaterial"
         {
-            token inputs:frame:stPrimvarName = "st"
+            token inputs:frame:stPrimvarName = "st" (
+                customData = {
+                    dictionary realitykit = {
+                        float2 positionInSubgraph = (-115.25, 86.5)
+                        float2 sizeInSubgraph = (203.5, 53)
+                    }
+                }
+            )
             token outputs:mtlx:surface
             token outputs:realitykit:vertex
             prepend token outputs:surface.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.outputs:surface>
+            float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (126.25, 109.5)
+            float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
 
             def Shader "DefaultSurfaceShader"
             {
@@ -572,6 +739,334 @@ def Xform "Root"
                     token inputs:varname.connect = </Root/Materials/CoinMaterial/DefaultSurfaceShader.inputs:frame:stPrimvarName>
                     float2 outputs:result
                 }
+            }
+        }
+
+        def Material "RandomMaterial"
+        {
+            prepend token outputs:mtlx:surface.connect = </Root/Materials/RandomMaterial/PreviewSurface.outputs:out>
+            token outputs:realitykit:vertex.connect = None
+            float2 ui:nodegraph:realitykit:subgraphOutputs:pos = (323.46588, 308.65457)
+            float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
+            int ui:nodegraph:realitykit:subgraphOutputs:stackingOrder = 245
+
+            def Shader "PreviewSurface"
+            {
+                uniform token info:id = "ND_UsdPreviewSurface_surfaceshader"
+                float inputs:clearcoat
+                float inputs:clearcoatRoughness
+                color3f inputs:diffuseColor.connect = </Root/Materials/RandomMaterial/Ramplr.outputs:out>
+                color3f inputs:emissiveColor
+                float inputs:ior
+                float inputs:metallic = 0.2
+                float3 inputs:normal.connect = </Root/Materials/RandomMaterial/Noise3D.outputs:out>
+                float inputs:occlusion = 0.3
+                float inputs:opacity
+                float inputs:roughness = 0.5
+                float inputs:roughness.connect = </Root/Materials/RandomMaterial/Extract_1.outputs:out>
+                token outputs:out
+                float2 ui:nodegraph:node:pos = (124.92845, 262.80533)
+                float2 ui:nodegraph:node:size = (159.5, 307)
+                int ui:nodegraph:node:stackingOrder = 940
+                string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["inputs:diffuseColor", "Advanced"]
+            }
+
+            def Shader "Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                float3 outputs:out
+                float2 ui:nodegraph:node:pos = (-823.0709, 267.12656)
+                float2 ui:nodegraph:node:size = (133.5, 40)
+                int ui:nodegraph:node:stackingOrder = 914
+            }
+
+            def Shader "Multiply"
+            {
+                uniform token info:id = "ND_multiply_vector3"
+                float3 inputs:in1.connect = </Root/Materials/RandomMaterial/Position.outputs:out>
+                float3 inputs:in2 = (200, 200, 200)
+                float3 inputs:in2.connect = None
+                float3 outputs:out
+                float2 ui:nodegraph:node:pos = (-708.33966, 275.32196)
+                float2 ui:nodegraph:node:size = (60, 36)
+                int ui:nodegraph:node:stackingOrder = 914
+            }
+
+            def Shader "Noise3D"
+            {
+                uniform token info:id = "ND_noise3d_vector3"
+                float3 inputs:amplitude = (1, 1, 1)
+                float inputs:pivot = 0
+                prepend float3 inputs:position.connect = </Root/Materials/RandomMaterial/Multiply.outputs:out>
+                float3 outputs:out
+                float2 ui:nodegraph:node:pos = (-585.0751, 244.85045)
+                float2 ui:nodegraph:node:size = (105, 145)
+                int ui:nodegraph:node:stackingOrder = 914
+            }
+
+            def Shader "Constant"
+            {
+                uniform token info:id = "ND_constant_color3"
+                color3f inputs:value = (0.15804125, 0.4240274, 0.3087066) (
+                    colorSpace = "srgb_texture"
+                )
+                color3f outputs:out
+                float2 ui:nodegraph:node:pos = (-296.4415, 62.97463)
+                float2 ui:nodegraph:node:size = (151, 53)
+                int ui:nodegraph:node:stackingOrder = 930
+            }
+
+            def Shader "Constant_1"
+            {
+                uniform token info:id = "ND_constant_color3"
+                color3f inputs:value = (0.5738074, 0.5655358, 0) (
+                    colorSpace = "srgb_texture"
+                )
+                color3f outputs:out
+                float2 ui:nodegraph:node:pos = (-294.6531, 121.10661)
+                float2 ui:nodegraph:node:size = (155, 53)
+                int ui:nodegraph:node:stackingOrder = 929
+            }
+
+            def Shader "Ramplr"
+            {
+                uniform token info:id = "ND_ramplr_color3"
+                float2 inputs:texcoord.connect = </Root/Materials/RandomMaterial/Combine2.outputs:out>
+                color3f inputs:valuel.connect = </Root/Materials/RandomMaterial/Constant.outputs:out>
+                color3f inputs:valuer.connect = </Root/Materials/RandomMaterial/Constant_1.outputs:out>
+                color3f outputs:out
+                float2 ui:nodegraph:node:pos = (-70.59323, 108.57112)
+                float2 ui:nodegraph:node:size = (148.5, 145)
+                int ui:nodegraph:node:stackingOrder = 923
+                string[] ui:nodegraph:realitykit:node:attributesShowingChildren = []
+            }
+
+            def Shader "Extract"
+            {
+                uniform token info:id = "ND_extract_vector3"
+                float3 inputs:in.connect = </Root/Materials/RandomMaterial/Noise3D.outputs:out>
+                int inputs:index = 2
+                float outputs:out
+                float2 ui:nodegraph:node:pos = (-424.97824, 187.50331)
+                float2 ui:nodegraph:node:size = (129.5, 40)
+                int ui:nodegraph:node:stackingOrder = 932
+            }
+
+            def Shader "Combine2"
+            {
+                uniform token info:id = "ND_combine2_vector2"
+                float inputs:in1.connect = </Root/Materials/RandomMaterial/Extract.outputs:out>
+                float inputs:in2
+                float2 outputs:out
+                float2 ui:nodegraph:node:pos = (-276.48343, 195.28601)
+                float2 ui:nodegraph:node:size = (144.5, 53)
+                int ui:nodegraph:node:stackingOrder = 920
+            }
+
+            def Shader "Extract_1"
+            {
+                uniform token info:id = "ND_extract_vector3"
+                float3 inputs:in.connect = </Root/Materials/RandomMaterial/Noise3D.outputs:out>
+                int inputs:index = 2
+                float outputs:out
+                float2 ui:nodegraph:node:pos = (-65.619255, 217.49937)
+                float2 ui:nodegraph:node:size = (142, 53)
+                int ui:nodegraph:node:stackingOrder = 945
+            }
+        }
+
+        def "MaplePlywood" (
+            active = true
+            references = @MaplePlywood.usdz@
+        )
+        {
+            color3f inputs:Basecolor_Tint (
+                customData = {
+                    dictionary realitykit = {
+                        float2 positionInSubgraph = (-56.812614, 67.17455)
+                        float2 sizeInSubgraph = (160.5, 53)
+                        int stackingOrderInSubgraph = 2338
+                    }
+                }
+            )
+            float2 inputs:UV_Scale (
+                customData = {
+                    dictionary realitykit = {
+                        float2 positionInSubgraph = (-725.2588, 351.55255)
+                        float2 sizeInSubgraph = (138.5, 53)
+                        int stackingOrderInSubgraph = 2336
+                    }
+                }
+            )
+            float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
+
+            over "Dot"
+            {
+                float2 ui:nodegraph:node:size = (44, 18)
+                int ui:nodegraph:node:stackingOrder = 2335
+                string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["outputs:out"]
+            }
+
+            over "multiply"
+            {
+                float2 ui:nodegraph:node:size = (60, 36)
+                int ui:nodegraph:node:stackingOrder = 2341
+            }
+
+            over "add"
+            {
+                float2 ui:nodegraph:node:size = (61.5, 36.5)
+                int ui:nodegraph:node:stackingOrder = 2343
+                string[] ui:nodegraph:realitykit:node:attributesShowingChildren = ["outputs:out", "inputs:in2"]
+            }
+
+            over "PreviewSurface"
+            {
+                float2 ui:nodegraph:node:size = (148.5, 199)
+            }
+
+            over "Mix"
+            {
+                float2 ui:nodegraph:node:size = (109, 145)
+            }
+
+            over "Swizzle"
+            {
+                float2 ui:nodegraph:node:size = (133.5, 40)
+                int ui:nodegraph:node:stackingOrder = 2340
+            }
+
+            over "Swizzle_1"
+            {
+                float2 ui:nodegraph:node:size = (145.5, 53)
+                int ui:nodegraph:node:stackingOrder = 2339
+            }
+
+            over "Multiply_1"
+            {
+                float2 ui:nodegraph:node:size = (60, 36)
+            }
+
+            over "BaseColor"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+            }
+
+            over "Roughness"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+            }
+
+            over "Metallic"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+            }
+
+            over "Normal"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+            }
+        }
+
+        def "Green_Felt_Fabric" (
+            active = true
+            references = @GrayFeltFabric.usdz@
+        )
+        {
+            color3f inputs:Basecolor_Tint = (0.4, 0.64705884, 0.34509805) (
+                colorSpace = "srgb_texture"
+                customData = {
+                    dictionary realitykit = {
+                        float2 positionInSubgraph = (-56.812614, 67.17455)
+                        float2 sizeInSubgraph = (160.5, 53)
+                        int stackingOrderInSubgraph = 2342
+                    }
+                }
+            )
+            float2 inputs:UV_Scale (
+                customData = {
+                    dictionary realitykit = {
+                        float2 positionInSubgraph = (-725.2588, 351.55255)
+                        float2 sizeInSubgraph = (138.5, 53)
+                        int stackingOrderInSubgraph = 2338
+                    }
+                }
+            )
+            float2 ui:nodegraph:realitykit:subgraphOutputs:size = (181.5, 99)
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            float3 xformOp:translate = (0, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            over "Dot"
+            {
+                float2 ui:nodegraph:node:size = (44, 18)
+            }
+
+            over "multiply"
+            {
+                float3 inputs:in2 = (5, 5, 5)
+                float2 ui:nodegraph:node:size = (60, 36)
+                int ui:nodegraph:node:stackingOrder = 2346
+            }
+
+            over "add"
+            {
+                float3 inputs:in2 = (-1, 1, -1)
+                float2 ui:nodegraph:node:size = (61.5, 36.5)
+                int ui:nodegraph:node:stackingOrder = 2345
+            }
+
+            over "PreviewSurface"
+            {
+                float2 ui:nodegraph:node:size = (148.5, 199)
+            }
+
+            over "Mix"
+            {
+                float2 ui:nodegraph:node:size = (109, 145)
+                int ui:nodegraph:node:stackingOrder = 2354
+            }
+
+            over "Swizzle"
+            {
+                float2 ui:nodegraph:node:size = (133.5, 40)
+                int ui:nodegraph:node:stackingOrder = 2357
+            }
+
+            over "Swizzle_1"
+            {
+                float2 ui:nodegraph:node:size = (145.5, 53)
+                int ui:nodegraph:node:stackingOrder = 2356
+            }
+
+            over "Multiply_1"
+            {
+                float2 ui:nodegraph:node:size = (60, 36)
+                int ui:nodegraph:node:stackingOrder = 2355
+            }
+
+            over "BaseColor"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+            }
+
+            over "Roughness"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+                int ui:nodegraph:node:stackingOrder = 2352
+            }
+
+            over "Metallic"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+                int ui:nodegraph:node:stackingOrder = 2351
+            }
+
+            over "Normal"
+            {
+                float2 ui:nodegraph:node:size = (158.5, 235)
+                int ui:nodegraph:node:stackingOrder = 2348
             }
         }
     }
