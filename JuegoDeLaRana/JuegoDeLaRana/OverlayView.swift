@@ -9,9 +9,12 @@ import SwiftUI
 
 struct OverlayView: View {
     var body: some View {
+        let fontName = "Moderna"
+        let fontSize = UIFont.preferredFont(forTextStyle: .title1).pointSize
+        
         VStack(alignment: .leading) {
             Text("Juego de la Rana")
-                .font(.largeTitle)
+                .font(.custom(fontName, size: fontSize))
             Spacer()
         }
         .padding()

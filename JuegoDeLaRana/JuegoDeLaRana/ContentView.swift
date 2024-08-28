@@ -33,8 +33,11 @@ struct ARViewContainer: UIViewRepresentable {
             if let laranaAnchor = larana.anchor {
                 arView.scene.anchors.append(laranaAnchor)
             }
+            if let coin = larana.findEntity(named: "Coin") {
+                print("coin = \(coin)")
+            }
         }
-
+        
         // Add the horizontal plane anchor to the scene
         arView.scene.anchors.append(anchor)
 

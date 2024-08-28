@@ -16,6 +16,10 @@
 		8AD85B682C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */; };
 		8AD85B752C7E7DFA00537BB7 /* Scene.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B742C7E7DF900537BB7 /* Scene.usdz */; };
 		8AD85B772C7E817700537BB7 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B762C7E817700537BB7 /* OverlayView.swift */; };
+		8AD85B7A2C7F337600537BB7 /* Etxeak.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B792C7F337600537BB7 /* Etxeak.ttf */; };
+		8AD85B802C7F5AEA00537BB7 /* Moderna.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B7F2C7F5AEA00537BB7 /* Moderna.ttf */; };
+		8AD85B822C7F5B3E00537BB7 /* Sculptur.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B812C7F5B3E00537BB7 /* Sculptur.ttf */; };
+		8AD85B842C7F5B5000537BB7 /* Haritzag.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B832C7F5B4F00537BB7 /* Haritzag.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +52,10 @@
 		8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JuegoDeLaRanaUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		8AD85B742C7E7DF900537BB7 /* Scene.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Scene.usdz; sourceTree = "<group>"; };
 		8AD85B762C7E817700537BB7 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
+		8AD85B792C7F337600537BB7 /* Etxeak.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Etxeak.ttf; sourceTree = "<group>"; };
+		8AD85B7F2C7F5AEA00537BB7 /* Moderna.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Moderna.ttf; sourceTree = "<group>"; };
+		8AD85B812C7F5B3E00537BB7 /* Sculptur.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sculptur.ttf; sourceTree = "<group>"; };
+		8AD85B832C7F5B4F00537BB7 /* Haritzag.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Haritzag.ttf; path = ../../../../../../Downloads/Thierry_Arsaut_Fonts/Haritzag.ttf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +106,7 @@
 		8AD85B492C7E550600537BB7 /* JuegoDeLaRana */ = {
 			isa = PBXGroup;
 			children = (
+				8AD85B782C7F2C7A00537BB7 /* Fonts */,
 				8AD85B742C7E7DF900537BB7 /* Scene.usdz */,
 				8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */,
 				8AD85B4C2C7E550600537BB7 /* ContentView.swift */,
@@ -131,6 +140,17 @@
 				8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */,
 			);
 			path = JuegoDeLaRanaUITests;
+			sourceTree = "<group>";
+		};
+		8AD85B782C7F2C7A00537BB7 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				8AD85B7F2C7F5AEA00537BB7 /* Moderna.ttf */,
+				8AD85B792C7F337600537BB7 /* Etxeak.ttf */,
+				8AD85B832C7F5B4F00537BB7 /* Haritzag.ttf */,
+				8AD85B812C7F5B3E00537BB7 /* Sculptur.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -237,8 +257,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AD85B7A2C7F337600537BB7 /* Etxeak.ttf in Resources */,
+				8AD85B822C7F5B3E00537BB7 /* Sculptur.ttf in Resources */,
 				8AD85B522C7E550800537BB7 /* Preview Assets.xcassets in Resources */,
+				8AD85B802C7F5AEA00537BB7 /* Moderna.ttf in Resources */,
 				8AD85B752C7E7DFA00537BB7 /* Scene.usdz in Resources */,
+				8AD85B842C7F5B5000537BB7 /* Haritzag.ttf in Resources */,
 				8AD85B4F2C7E550800537BB7 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -433,6 +457,7 @@
 				DEVELOPMENT_TEAM = 59VPT4KMHW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JuegoDeLaRana/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -464,6 +489,7 @@
 				DEVELOPMENT_TEAM = 59VPT4KMHW;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JuegoDeLaRana/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
