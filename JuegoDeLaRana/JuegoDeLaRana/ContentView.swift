@@ -10,11 +10,46 @@ import RealityKit
 
 struct ContentView : View {
     var body: some View {
-        ARViewContainer()
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                ARViewContainer()
+                Header(for: geometry)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .edgesIgnoringSafeArea(.all)
             .overlay {
                 OverlayView()
             }
+        }
+    }
+    
+    @ViewBuilder
+    func Header(for geometry: GeometryProxy) -> some View {
+        Text("Juego de la Rana")
+            .frame(maxWidth: Constants.maxHeaderWidth)
+            .font(.custom(Constants.headerFontName, size: headerFontSize))
+            .padding(.top, geometry.safeAreaInsets.top > Constants.headerBottomPadding ? geometry.safeAreaInsets.top : Constants.headerBottomPadding)
+            .padding(.bottom, Constants.headerBottomPadding)
+            .background {
+                RoundedRectangle(cornerRadius: Constants.backgroundCornerRadius)
+                    .foregroundColor(.green)
+                    .shadow(radius: Constants.headerShadowRadius)
+            }
+    }
+    
+    // MARK: - Constants
+    
+    private struct Constants {
+        static let maxHeaderWidth: CGFloat = 420
+        static let headerFontName = "Moderna"
+        static let headerTopPadding: CGFloat = 56
+        static let headerBottomPadding: CGFloat = 8
+        static let backgroundCornerRadius: CGFloat = 56
+        static let headerShadowRadius: CGFloat = 16
+    }
+    
+    var headerFontSize: CGFloat {
+        UIFont.preferredFont(forTextStyle: .largeTitle).pointSize
     }
 }
 
