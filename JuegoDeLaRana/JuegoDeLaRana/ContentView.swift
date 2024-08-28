@@ -69,13 +69,16 @@ struct ARViewContainer: UIViewRepresentable {
         let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.2, 0.2)))
 
         // Load the La Rana scene
-        if let larana = try? ModelEntity.loadModel(named: "Scene") {
-            anchor.children.append(larana)
-            if let laranaAnchor = larana.anchor {
-                arView.scene.anchors.append(laranaAnchor)
-            }
+        if let larana = try? Entity.load(named: "Scene.usdz") {
+            // Append the loaded model to the anchor
+            anchor.addChild(larana)
+
+            // Search for the "Coin" entity within the loaded scene
             if let coin = larana.findEntity(named: "Coin") {
-                print("coin = \(coin)")
+                print("Coin entity found: \(coin) \(coin.position)")
+                // You can now manipulate the "Coin" entity as needed
+            } else {
+                print("Coin entity not found.")
             }
         }
         

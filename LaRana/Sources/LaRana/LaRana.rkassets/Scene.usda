@@ -71,11 +71,11 @@ def Xform "Root"
                     color3f inputs:diffuseColor = (0.04547659, 0.31259865, 0.030280374) (
                         colorSpace = "srgb_displayp3"
                     )
-                    color3f inputs:diffuseColor.connect = </Root/table/Materials/Material_Turf/diffuseColor.outputs:rgb>
+                    color3f inputs:diffuseColor.connect = None
                     normal3f inputs:normal = (0, 0, 1)
-                    normal3f inputs:normal.connect = </Root/table/Materials/Material_Turf/normal.outputs:rgb>
+                    normal3f inputs:normal.connect = None
                     float inputs:occlusion = 1
-                    float inputs:occlusion.connect = </Root/table/Materials/Material_Turf/occlusion.outputs:r>
+                    float inputs:occlusion.connect = None
                     float inputs:roughness = 0.8
                     float inputs:roughness.connect = None
                 }
@@ -189,11 +189,11 @@ def Xform "Root"
                     color3f inputs:diffuseColor = (0.9063318, 0.7155201, 0.46741065) (
                         colorSpace = "srgb_displayp3"
                     )
-                    color3f inputs:diffuseColor.connect = </Root/table/Materials/Material_Wood/diffuseColor.outputs:rgb>
+                    color3f inputs:diffuseColor.connect = None
                     normal3f inputs:normal = (0, 0, 1)
-                    normal3f inputs:normal.connect = </Root/table/Materials/Material_Wood/normal.outputs:rgb>
+                    normal3f inputs:normal.connect = None
                     float inputs:occlusion = 1
-                    float inputs:occlusion.connect = </Root/table/Materials/Material_Wood/occlusion.outputs:r>
+                    float inputs:occlusion.connect = None
                 }
 
                 def Shader "PreviewSurface" (
