@@ -2,6 +2,7 @@
   "pathsToIds" : {
     "LaRana\/Sources\/LaRana\/LaRana.rkassets\/reduced.usdz" : "9A788876-2088-4776-9806-E5F557A1D9C6",
     "LaRana\/Sources\/LaRana\/LaRana.rkassets\/Scene.usda" : "1608E04E-B18D-4D1C-9377-F059198F61D8",
-    "LaRana\/Sources\/LaRana\/LaRana.rkassets\/table.usdz" : "651922B1-A14B-4FA7-8C99-7B7EA78852B1"
+    "LaRana\/Sources\/LaRana\/LaRana.rkassets\/table.usdz" : "651922B1-A14B-4FA7-8C99-7B7EA78852B1",
+    "LaRana\/Sources\/LaRana\/LaRana.rkassets\/TableAndLaRana.usda" : "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC"
   }
 }

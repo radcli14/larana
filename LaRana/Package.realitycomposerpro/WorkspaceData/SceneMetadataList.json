@@ -4,7 +4,9 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "Materials"
+        "table",
+        "Materials",
+        "Material_Turf"
       ],
       {
         "isExpanded" : true,
@@ -14,12 +16,32 @@
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
         "table",
-        "Geom",
-        "ChuteLeft_Cube_014"
+        "Geom"
       ],
       {
-        "isExpanded" : false,
-        "isLocked" : true
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials",
+        "Material_Wood"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
       },
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
@@ -51,7 +73,7 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "Coin"
+        "Materials"
       ],
       {
         "isExpanded" : true,
@@ -80,8 +102,7 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "table",
-        "Materials"
+        "Coin"
       ],
       {
         "isExpanded" : true,
@@ -91,15 +112,28 @@
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
         "table",
-        "Materials",
-        "Material_Turf"
+        "Geom",
+        "ChuteLeft_Cube_014"
+      ],
+      {
+        "isExpanded" : false,
+        "isLocked" : true
+      }
+    ]
+  },
+  "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC" : {
+    "objectMetadataList" : [
+      [
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
+        "Root",
+        "Materials"
       ],
       {
         "isExpanded" : true,
         "isLocked" : false
       },
       [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
         "table",
         "Geom"
@@ -109,11 +143,26 @@
         "isLocked" : false
       },
       [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
+        "Root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
-        "table",
-        "Materials",
-        "Material_Wood"
+        "PhysicsObjects"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
+        "Root",
+        "table"
       ],
       {
         "isExpanded" : true,

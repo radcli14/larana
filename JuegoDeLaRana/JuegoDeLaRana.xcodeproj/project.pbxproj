@@ -14,7 +14,7 @@
 		8AD85B5C2C7E550900537BB7 /* JuegoDeLaRanaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B5B2C7E550900537BB7 /* JuegoDeLaRanaTests.swift */; };
 		8AD85B662C7E550900537BB7 /* JuegoDeLaRanaUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B652C7E550900537BB7 /* JuegoDeLaRanaUITests.swift */; };
 		8AD85B682C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */; };
-		8AD85B752C7E7DFA00537BB7 /* Scene.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B742C7E7DF900537BB7 /* Scene.usdz */; };
+		8AD85B752C7E7DFA00537BB7 /* TableAndLaRana.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B742C7E7DF900537BB7 /* TableAndLaRana.usdz */; };
 		8AD85B772C7E817700537BB7 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B762C7E817700537BB7 /* OverlayView.swift */; };
 		8AD85B7A2C7F337600537BB7 /* Etxeak.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B792C7F337600537BB7 /* Etxeak.ttf */; };
 		8AD85B802C7F5AEA00537BB7 /* Moderna.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B7F2C7F5AEA00537BB7 /* Moderna.ttf */; };
@@ -50,7 +50,7 @@
 		8AD85B612C7E550900537BB7 /* JuegoDeLaRanaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JuegoDeLaRanaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AD85B652C7E550900537BB7 /* JuegoDeLaRanaUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JuegoDeLaRanaUITests.swift; sourceTree = "<group>"; };
 		8AD85B672C7E550900537BB7 /* JuegoDeLaRanaUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JuegoDeLaRanaUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		8AD85B742C7E7DF900537BB7 /* Scene.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = Scene.usdz; sourceTree = "<group>"; };
+		8AD85B742C7E7DF900537BB7 /* TableAndLaRana.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = TableAndLaRana.usdz; sourceTree = "<group>"; };
 		8AD85B762C7E817700537BB7 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		8AD85B792C7F337600537BB7 /* Etxeak.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Etxeak.ttf; sourceTree = "<group>"; };
 		8AD85B7F2C7F5AEA00537BB7 /* Moderna.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Moderna.ttf; sourceTree = "<group>"; };
@@ -107,7 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				8AD85B782C7F2C7A00537BB7 /* Fonts */,
-				8AD85B742C7E7DF900537BB7 /* Scene.usdz */,
+				8AD85B742C7E7DF900537BB7 /* TableAndLaRana.usdz */,
 				8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */,
 				8AD85B4C2C7E550600537BB7 /* ContentView.swift */,
 				8AD85B762C7E817700537BB7 /* OverlayView.swift */,
@@ -261,7 +261,7 @@
 				8AD85B822C7F5B3E00537BB7 /* Sculptur.ttf in Resources */,
 				8AD85B522C7E550800537BB7 /* Preview Assets.xcassets in Resources */,
 				8AD85B802C7F5AEA00537BB7 /* Moderna.ttf in Resources */,
-				8AD85B752C7E7DFA00537BB7 /* Scene.usdz in Resources */,
+				8AD85B752C7E7DFA00537BB7 /* TableAndLaRana.usdz in Resources */,
 				8AD85B842C7F5B5000537BB7 /* Haritzag.ttf in Resources */,
 				8AD85B4F2C7E550800537BB7 /* Assets.xcassets in Resources */,
 			);

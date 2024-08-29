@@ -1,0 +1,745 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "Reality Composer Pro Version 1.0 (409.100.15)"
+    }
+    defaultPrim = "Root"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "Root"
+{
+    reorder nameChildren = ["table", "larana", "Materials", "PhysicsObjects", "LaRanaLeft"]
+    def "table" (
+        active = true
+        customData = {
+            float3 rotationEulerHint = (0, -1.5707963, 0)
+        }
+        references = @table.usdz@
+    )
+    {
+        quatf xformOp:orient = (0.70710677, 0, -0.70710677, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        over "Geom"
+        {
+            over "LegFrontLeft_Cube_001" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegFrontRight_Cube" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegRearLeft_Cube_003" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "LegRearRight_Cube_002" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableWallLeft_Cube_007" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableWallRight_Cube_006" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableBack_Cube_005" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableMain_Cube_015" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "SupportLowerCenter_Cube_010" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "SupportLowerFront_Cube_008" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "SupportLowerRear_Cube_009" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteFront_Cube_011" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteLeft_Cube_014" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteRight_Cube_013" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "ChuteSlope_Cube_012" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Wood> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableBackTurf_Cube_016" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableMainTurf_Cube_017" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableWallLeftTurf_Cube_018" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableWallRightTurf_Cube_019" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Turf> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+
+            over "TableHole_Cylinder" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Transparent> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
+        }
+    }
+
+    def "larana" (
+        active = true
+        customData = {
+            float3 rotationEulerHint = (0, 0.34906587, 0)
+        }
+        references = @reduced.usdz@
+    )
+    {
+        quatf xformOp:orient = (0.9848077, 0, 0.17364818, 0)
+        float3 xformOp:scale = (0.2, 0.2, 0.2)
+        float3 xformOp:translate = (0, 0.62, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+    }
+
+    def Scope "Materials" (
+        active = true
+    )
+    {
+        reorder nameChildren = ["Wood", "Turf", "Iron", "Transparent"]
+        def Material "Wood"
+        {
+            token inputs:frame:stPrimvarName = "st"
+            token outputs:mtlx:surface
+            token outputs:realitykit:vertex
+            prepend token outputs:surface.connect = </Root/Materials/Wood/UsdPreviewSurface.outputs:surface>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.18, 0.18, 0.18)
+                color3f inputs:diffuseColor.connect = </Root/Materials/Wood/diffuseColor.outputs:rgb>
+                normal3f inputs:normal = (0, 0, 1)
+                normal3f inputs:normal.connect = </Root/Materials/Wood/normal.outputs:rgb>
+                float inputs:occlusion = 1
+                float inputs:occlusion.connect = </Root/Materials/Wood/occlusion.outputs:r>
+                token outputs:surface
+            }
+
+            def Shader "diffuseColor"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Wood_Beech_Raw_1k_8b_15wmoo4/textures/Wood_Beech_Raw_baseColor.png@
+                float2 inputs:st.connect = </Root/Materials/Wood/diffuseColor/TexCoordReader.outputs:result>
+                color3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Wood/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "normal"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Wood_Beech_Raw_1k_8b_15wmoo4/textures/Wood_Beech_Raw_normal.png@
+                float2 inputs:st.connect = </Root/Materials/Wood/normal/TexCoordReader.outputs:result>
+                normal3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Wood/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "occlusion"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Wood_Beech_Raw_1k_8b_15wmoo4/textures/Wood_Beech_Raw_mask.png@
+                float2 inputs:st.connect = </Root/Materials/Wood/occlusion/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Wood/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+        }
+
+        def Material "Turf"
+        {
+            token inputs:frame:stPrimvarName = "st"
+            token outputs:mtlx:surface
+            token outputs:realitykit:vertex
+            prepend token outputs:surface.connect = </Root/Materials/Turf/UsdPreviewSurface.outputs:surface>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.18, 0.18, 0.18)
+                color3f inputs:diffuseColor.connect = </Root/Materials/Turf/diffuseColor.outputs:rgb>
+                normal3f inputs:normal = (0, 0, 1)
+                normal3f inputs:normal.connect = </Root/Materials/Turf/normal.outputs:rgb>
+                float inputs:occlusion = 1
+                float inputs:occlusion.connect = </Root/Materials/Turf/occlusion.outputs:r>
+                token outputs:surface
+            }
+
+            def Shader "diffuseColor"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Khaki_Green_Linen_Fabric_2k_8b_HvMAbo0/textures/Khaki_Green_Linen_Fabric_baseColor.png@
+                float2 inputs:st.connect = </Root/Materials/Turf/diffuseColor/TexCoordReader.outputs:result>
+                color3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Turf/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "normal"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Khaki_Green_Linen_Fabric_2k_8b_HvMAbo0/textures/Khaki_Green_Linen_Fabric_Normal.png@
+                float2 inputs:st.connect = </Root/Materials/Turf/normal/TexCoordReader.outputs:result>
+                normal3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Turf/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "occlusion"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Khaki_Green_Linen_Fabric_2k_8b_HvMAbo0/textures/Khaki_Green_Linen_Fabric_Mask.png@
+                float2 inputs:st.connect = </Root/Materials/Turf/occlusion/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Turf/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+        }
+
+        def Material "Iron"
+        {
+            token inputs:frame:stPrimvarName = "st"
+            token outputs:mtlx:surface
+            token outputs:realitykit:vertex
+            prepend token outputs:surface.connect = </Root/Materials/Iron/UsdPreviewSurface.outputs:surface>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.18, 0.18, 0.18)
+                color3f inputs:diffuseColor.connect = </Root/Materials/Iron/diffuseColor.outputs:rgb>
+                float inputs:metallic = 0
+                float inputs:metallic.connect = </Root/Materials/Iron/metallic.outputs:r>
+                normal3f inputs:normal = (0, 0, 1)
+                normal3f inputs:normal.connect = </Root/Materials/Iron/normal.outputs:rgb>
+                float inputs:occlusion = 1
+                float inputs:occlusion.connect = </Root/Materials/Iron/occlusion.outputs:r>
+                float inputs:roughness = 0.5
+                float inputs:roughness.connect = </Root/Materials/Iron/roughness.outputs:r>
+                token outputs:surface
+            }
+
+            def Shader "diffuseColor"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_baseColor.png@
+                float2 inputs:st.connect = </Root/Materials/Iron/diffuseColor/TexCoordReader.outputs:result>
+                color3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Iron/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "roughness"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_roughness.png@
+                float2 inputs:st.connect = </Root/Materials/Iron/roughness/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Iron/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "metallic"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_metallic.png@
+                float2 inputs:st.connect = </Root/Materials/Iron/metallic/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Iron/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "normal"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_normal.png@
+                float2 inputs:st.connect = </Root/Materials/Iron/normal/TexCoordReader.outputs:result>
+                normal3f outputs:rgb
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Iron/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+
+            def Shader "occlusion"
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_mask.png@
+                float2 inputs:st.connect = </Root/Materials/Iron/occlusion/TexCoordReader.outputs:result>
+                float outputs:r
+
+                def Shader "TexCoordReader"
+                {
+                    uniform token info:id = "UsdPrimvarReader_float2"
+                    token inputs:varname.connect = </Root/Materials/Iron/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    float2 outputs:result
+                }
+            }
+        }
+
+        def Material "Transparent"
+        {
+            token outputs:mtlx:surface
+            token outputs:realitykit:vertex
+            prepend token outputs:surface.connect = </Root/Materials/Transparent/UsdPreviewSurface.outputs:surface>
+
+            def Shader "UsdPreviewSurface"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                float inputs:opacity = 0
+                token outputs:surface
+            }
+        }
+    }
+
+    def Scope "PhysicsObjects" (
+        active = true
+    )
+    {
+        reorder nameChildren = ["Coin", "TableMainFront", "TableMainBack", "TableMainLeft", "TableMainRight", "LaRanaFront", "LaRanaRear", "LaRanaLeft", "LaRanaRight"]
+        def Cylinder "Coin" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            uniform token axis = "Y"
+            double height = 0.005
+            rel material:binding = </Root/Materials/Iron> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double radius = 0.015
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (1, 1, 1)
+            float3 xformOp:translate = (0, 0.75, 0.1)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                prepend token outputs:surface.connect = </Root/PhysicsObjects/Coin/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "TableMainFront" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            rel material:binding = </Root/table/Materials/Material_Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.2
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (2.8, 0.075, 1.2)
+            float3 xformOp:translate = (0, 0.615, 0.15)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                prepend token outputs:surface.connect = </Root/PhysicsObjects/TableMainFront/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "TableMainBack" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            rel material:binding = </Root/table/Materials/Material_Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.2
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (2.8, 0.075, 1)
+            float3 xformOp:translate = (0, 0.615, -0.16)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                token outputs:surface.connect = </Root/PhysicsObjects/TableMainBack/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "TableMainLeft" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            rel material:binding = </Root/table/Materials/Material_Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.2
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (1.2, 0.075, 0.5)
+            float3 xformOp:translate = (-0.16, 0.615, -0.014)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                prepend token outputs:surface.connect = </Root/PhysicsObjects/TableMainLeft/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "TableMainRight" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            rel material:binding = </Root/table/Materials/Material_Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.2
+            quatf xformOp:orient = (1, 0, 0, 0)
+            float3 xformOp:scale = (1.2, 0.075, 0.5)
+            float3 xformOp:translate = (0.16, 0.615, -0.014)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                token outputs:surface.connect = </Root/PhysicsObjects/TableMainRight/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "LaRanaFront" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+            customData = {
+                float3 rotationEulerHint = (0.26179937, 0, 0)
+            }
+        )
+        {
+            rel material:binding = </Root/Materials/Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.08
+            quatf xformOp:orient = (0.9914449, 0.13052619, 0, 0)
+            float3 xformOp:scale = (0.8, 1, 0.2)
+            float3 xformOp:translate = (-8.614734e-9, 0.6627268, 0.039530784)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                prepend token outputs:surface.connect = </Root/PhysicsObjects/LaRanaFront/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "LaRanaRear" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+            customData = {
+                float3 rotationEulerHint = (0.6981317, 0, 0)
+            }
+        )
+        {
+            rel material:binding = </Root/Materials/Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.12
+            quatf xformOp:orient = (0.9396926, 0.34202012, 0, 0)
+            float3 xformOp:scale = (0.6, 1.2, 0.09999999)
+            float3 xformOp:translate = (-9.778887e-9, 0.6820245, -0.015882619)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                token outputs:surface.connect = </Root/PhysicsObjects/LaRanaRear/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "LaRanaLeft" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+            customData = {
+                float3 rotationEulerHint = (0.6338297, 0.041684933, -0.07230535)
+            }
+        )
+        {
+            rel material:binding = </Root/Materials/Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.1
+            quatf xformOp:orient = (0.9491395, 0.312081, 0.0085285725, -0.040827937)
+            float3 xformOp:scale = (0.1, 1.5, 0.5)
+            float3 xformOp:translate = (-0.033053372, 0.6602569, -0.0023867153)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                prepend token outputs:surface.connect = </Root/PhysicsObjects/LaRanaLeft/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+
+        def Cube "LaRanaRight" (
+            active = true
+            prepend apiSchemas = ["MaterialBindingAPI"]
+            customData = {
+                float3 rotationEulerHint = (0.6338299, -0.04171337, 0.072256625)
+            }
+        )
+        {
+            rel material:binding = </Root/Materials/Transparent> (
+                bindMaterialAs = "weakerThanDescendants"
+            )
+            double size = 0.1
+            quatf xformOp:orient = (0.94914, 0.3120813, -0.008549672, 0.040809233)
+            float3 xformOp:scale = (0.10000002, 1.5, 0.5)
+            float3 xformOp:translate = (0.03305, 0.6602569, -0.0023867153)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+            def Material "DefaultMaterial"
+            {
+                token outputs:surface.connect = </Root/PhysicsObjects/LaRanaRight/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+                def Shader "DefaultSurfaceShader"
+                {
+                    uniform token info:id = "UsdPreviewSurface"
+                    color3f inputs:diffuseColor = (1, 1, 1)
+                    float inputs:roughness = 0.75
+                    token outputs:surface
+                }
+            }
+        }
+    }
+}
+
