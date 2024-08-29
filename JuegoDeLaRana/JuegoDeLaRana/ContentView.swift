@@ -64,6 +64,8 @@ struct ARViewContainer: UIViewRepresentable {
     func makeUIView(context: Context) -> ARView {
         
         let arView = ARView(frame: .zero)
+        
+        arView.debugOptions = [.showFeaturePoints, .showWorldOrigin]
 
         // Create horizontal plane anchor for the content
         let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.2, 0.2)))
@@ -75,8 +77,22 @@ struct ARViewContainer: UIViewRepresentable {
 
             // Search for the "Coin" entity within the loaded scene
             if let coin = larana.findEntity(named: "Coin") {
-                print("Coin entity found: \(coin) \(coin.position)")
-                // You can now manipulate the "Coin" entity as needed
+                print("Coin entity found: \(coin) \(coin.position) \(coin.components)")
+                
+                // TEMP: put the coin above the table so its visible
+                coin.position = SIMD3<Float>(0.0, 1.0, 0.0)
+                Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                    print("coin position = \(coin.position)")
+                }
+                
+                let shape = ShapeResource.generateCapsule(height: 0.005, radius: 0.015)
+                let physicsBody = PhysicsBodyComponent(
+                    shapes: [shape],
+                    mass: 0.1,
+                    mode: .dynamic
+                )
+                coin.components[PhysicsBodyComponent.self] = physicsBody
+                coin.components[CollisionComponent.self] = CollisionComponent(shapes: [shape])
             } else {
                 print("Coin entity not found.")
             }
