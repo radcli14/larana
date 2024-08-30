@@ -65,7 +65,7 @@ struct ARViewContainer: UIViewRepresentable {
         
         let arView = ARView(frame: .zero)
         
-        //arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
+        arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
 
         // Create horizontal plane anchor for the content
         let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.2, 0.2)))
@@ -75,22 +75,16 @@ struct ARViewContainer: UIViewRepresentable {
             // Append the loaded model to the anchor
             anchor.addChild(larana)
 
-            let metal = PhysicsMaterialResource.generate(friction: 0.3, restitution: 0.99)
-            let turf = PhysicsMaterialResource.generate(friction: 0.7, restitution: 0.5)
-            let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
-            
-            // Search for the "Coin" entity within the loaded scene
+            // Add contact to the coin
             if let coin = larana.findEntity(named: "Coin") {
-                print("Coin entity found: \(coin) \(coin.position) \(coin.components)")
-                
-                // TEMP: put the coin above the table so its visible
+                // TEMP: put the coin above the table so its visible and bounces a few times
                 coin.position = SIMD3<Float>(0.1, 5.0, 0.0)
                 Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
                     print("coin position = \(coin.position)")
                 }
                 
                 // Set up the shape and physics for the coin
-                coin.addPhysics(material: metal, mode: .dynamic)
+                coin.addPhysics(material: Materials.metal, mode: .dynamic)
                 
             } else {
                 print("Coin entity not found.")
@@ -98,23 +92,11 @@ struct ARViewContainer: UIViewRepresentable {
             
             // Add contact to the turf sections
             let turfEntities = ["TableMainFront", "TableMainBack", "TableMainLeft", "TableMainRight"]
-            for name in turfEntities  {
-                if let table = larana.findEntity(named: name) {
-                    table.addPhysics(material: turf, mode: .static)
-                } else {
-                    print("Table entity \(name) not found")
-                }
-            }
+            addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .static)
             
             // Add contact to La Rana
             let metalEntities = ["LaRanaFront", "LaRanaRear", "LaRanaLeft", "LaRanaRight"]
-            for name in metalEntities  {
-                if let frog = larana.findEntity(named: name) {
-                    frog.addPhysics(material: metal, mode: .static)
-                } else {
-                    print("Frog entity \(name) not found")
-                }
-            }
+            addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
         }
         
         // Add the horizontal plane anchor to the scene
@@ -125,6 +107,24 @@ struct ARViewContainer: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: ARView, context: Context) {}
+    
+    // MARK: - Physics
+    
+    func addPhysics(to listOfEntityNames: [String], in mainEntity: Entity, material: PhysicsMaterialResource, mode: PhysicsBodyMode) {
+        for name in listOfEntityNames {
+            if let entity = mainEntity.findEntity(named: name) {
+                entity.addPhysics(material: material, mode: mode)
+            } else {
+                print("Entity \(name) not found")
+            }
+        }
+    }
+    
+    private struct Materials {
+        static let metal = PhysicsMaterialResource.generate(friction: 0.3, restitution: 0.99)
+        static let turf = PhysicsMaterialResource.generate(friction: 0.7, restitution: 0.5)
+        static let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
+    }
 }
 
 extension Entity {

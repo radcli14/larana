@@ -464,7 +464,14 @@ def Xform "Root"
             def Shader "UsdPreviewSurface"
             {
                 uniform token info:id = "UsdPreviewSurface"
+                float inputs:clearcoatRoughness = 0
+                color3f inputs:diffuseColor = (0, 0, 0) (
+                    colorSpace = "srgb_displayp3"
+                )
+                float inputs:ior = 1
+                float inputs:occlusion = 0
                 float inputs:opacity = 0
+                float inputs:roughness = 0
                 token outputs:surface
             }
         }
