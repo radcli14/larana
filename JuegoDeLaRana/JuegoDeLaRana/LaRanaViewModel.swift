@@ -15,7 +15,7 @@ enum GameState {
 }
 
 class LaRanaViewModel: ObservableObject {
-    
+    @Published var entities = ARViewEntities()
     @Published var state = GameState.play
     
     // MARK: - Button Intents
