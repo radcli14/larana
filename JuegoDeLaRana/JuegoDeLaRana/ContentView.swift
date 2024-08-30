@@ -9,6 +9,8 @@ import SwiftUI
 import RealityKit
 
 struct ContentView : View {
+    @ObservedObject var viewModel: LaRanaViewModel = LaRanaViewModel()
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
@@ -18,9 +20,27 @@ struct ContentView : View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .edgesIgnoringSafeArea(.all)
             .overlay {
-                OverlayView()
+                OverlayView(
+                    state: viewModel.state,
+                    onTapReset: {
+                        withAnimation {
+                            viewModel.resetAnchor()
+                        }
+                    },
+                    onTapMove: {
+                        withAnimation {
+                            viewModel.toggleMove()
+                        }
+                    },
+                    onTapRotate: {
+                        withAnimation {
+                            viewModel.toggleRotate()
+                        }
+                    }
+                )
             }
         }
+        //EmptyView()
     }
     
     // MARK: - Header
@@ -68,8 +88,20 @@ struct ARViewContainer: UIViewRepresentable {
         arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
 
         // Create horizontal plane anchor for the content
-        let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(0.2, 0.2)))
-
+        let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(Constants.anchorWidth, Constants.anchorWidth)))
+        
+        // Create a floor that sits with the anchor to visualize its location
+        let mesh = MeshResource.generateBox(
+            width: Constants.anchorWidth,
+            height: Constants.anchorHeight,
+            depth: Constants.anchorWidth,
+            cornerRadius: 0.5 * Constants.anchorHeight
+        )
+        let material = SimpleMaterial(color: .green, roughness: 0.15, isMetallic: true)
+        let floor = ModelEntity(mesh: mesh, materials: [material])
+        floor.transform.translation.y = 0.5 * Constants.anchorHeight
+        anchor.addChild(floor)
+        
         // Load the La Rana scene
         if let larana = try? Entity.load(named: "TableAndLaRana.usdz") {
             // Append the loaded model to the anchor
@@ -77,14 +109,14 @@ struct ARViewContainer: UIViewRepresentable {
 
             // Add contact to the coin
             if let coin = larana.findEntity(named: "Coin") {
+                // Set up the shape and physics for the coin
+                coin.addPhysics(material: Materials.metal, mode: .dynamic)
+                
                 // TEMP: put the coin above the table so its visible and bounces a few times
                 coin.position = SIMD3<Float>(0.1, 5.0, 0.0)
                 Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
                     print("coin position = \(coin.position)")
                 }
-                
-                // Set up the shape and physics for the coin
-                coin.addPhysics(material: Materials.metal, mode: .dynamic)
                 
             } else {
                 print("Coin entity not found.")
@@ -125,6 +157,13 @@ struct ARViewContainer: UIViewRepresentable {
         static let turf = PhysicsMaterialResource.generate(friction: 0.7, restitution: 0.5)
         static let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
     }
+    
+    // MARK: - Constants
+    
+    private struct Constants {
+        static let anchorWidth: Float = 0.7
+        static let anchorHeight: Float = 0.01
+    }
 }
 
 extension Entity {
@@ -137,7 +176,7 @@ extension Entity {
                 // Generate collision shapes based on the model's mesh
                 let shape = ShapeResource.generateConvex(from: modelComponent.mesh)
                 let collisionComponent = CollisionComponent(shapes: [shape])
-                components[CollisionComponent.self] = collisionComponent
+                components.set(collisionComponent) // [CollisionComponent.self] = collisionComponent
 
                 // Create and add a PhysicsBodyComponent
                 let physicsBody = PhysicsBodyComponent(
@@ -145,7 +184,7 @@ extension Entity {
                     material: material,
                     mode: mode
                 )
-                components[PhysicsBodyComponent.self] = physicsBody
+                components.set(physicsBody) //[PhysicsBodyComponent.self] = physicsBody
                 
                 print("Physics and collision components added to \(self)")
             }
@@ -157,4 +196,5 @@ extension Entity {
 
 #Preview {
     ContentView()
+    //ARViewContainer()
 }

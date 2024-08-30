@@ -8,11 +8,67 @@
 import SwiftUI
 
 struct OverlayView: View {
+    let state: GameState
+    let onTapReset: () -> Void
+    let onTapMove: () -> Void
+    let onTapRotate: () -> Void
+    
     var body: some View {
-        EmptyView()
+        VStack {
+            Spacer()
+            HStack(alignment: .center, spacing: Constants.buttonSpacing) {
+                resetAnchorButton
+                moveTableButton
+                rotateTableButton
+            }
+        }
+    }
+    
+    // MARK: - Buttons
+     
+    @ViewBuilder
+    private func OverlayButton(text: String, activeForState: GameState, action: @escaping () -> Void) -> some View {
+        if state == activeForState {
+            Button(action: { action() }) {
+                Text(text)
+            }
+            .frame(width: Constants.buttonWidth)
+            .buttonStyle(.borderedProminent)
+        } else {
+            Button(action: { action() }) {
+                Text(text)
+            }
+            .frame(width: Constants.buttonWidth)
+            .buttonStyle(.bordered)
+        }
+        
+    }
+    
+    private var resetAnchorButton: some View {
+        OverlayButton(text: "Reset\nAnchor", activeForState: .resetting, action: { onTapReset() })
+    }
+    
+    private var moveTableButton: some View {
+        OverlayButton(text: "Move\nTable", activeForState: .move, action: { onTapMove() })
+    }
+    
+    private var rotateTableButton: some View {
+        OverlayButton(text: "Rotate\nTable", activeForState: .rotate, action: { onTapRotate() })
+    }
+    
+    // MARK: - Constants
+    
+    private struct Constants {
+        static let buttonSpacing: CGFloat = 0
+        static let buttonWidth: CGFloat = 96
     }
 }
 
 #Preview {
-    OverlayView()
+    OverlayView(
+        state: .move,
+        onTapReset: {},
+        onTapMove: {},
+        onTapRotate: {}
+    )
 }
