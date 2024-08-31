@@ -12,22 +12,32 @@ struct ARViewEntities {
     
     // Create horizontal plane anchor for the content
     let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(Constants.anchorWidth, Constants.anchorWidth)))
+    var floor: ModelEntity?
     var larana: Entity?
     var coin: Entity?
-    
+
     init() {
-        // Create a floor that sits with the anchor to visualize its location
+        buildFloor()
+        loadModel()
+    }
+    
+    // MARK: - Setup
+
+    /// Create a floor that sits with the anchor to visualize its location
+    mutating func buildFloor() {
         let mesh = MeshResource.generateBox(
             width: Constants.anchorWidth,
             height: Constants.anchorHeight,
             depth: Constants.anchorWidth,
             cornerRadius: 0.5 * Constants.anchorHeight
         )
-        let material = SimpleMaterial(color: .green, roughness: 0.15, isMetallic: true)
-        let floor = ModelEntity(mesh: mesh, materials: [material])
-        floor.transform.translation.y = 0.5 * Constants.anchorHeight
-        anchor.addChild(floor)
-        loadModel()
+        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
+        floor = ModelEntity(mesh: mesh, materials: [material])
+        if let floor {
+            floor.addPhysics(material: Materials.metal, mode: .static)
+            floor.transform.translation.y = 0.5 * Constants.anchorHeight
+            anchor.addChild(floor)
+        }
     }
     
     mutating func loadModel() {
@@ -38,9 +48,13 @@ struct ARViewEntities {
     }
     
     mutating func buildModel(for larana: Entity) {
-        // Append the loaded model to the anchor
-        anchor.addChild(larana)
-
+        // Append the loaded model to the anchor (or floor if available, for drag to reposition)
+        if let floor {
+            floor.addChild(larana)
+        } else {
+            anchor.addChild(larana)
+        }
+        
         // Add physics to the coin and table contact surfaces
         buildCoin(in: larana)
         buildContactSurfaces(in: larana)
@@ -97,7 +111,7 @@ struct ARViewEntities {
     // MARK: - Constants
     
     private struct Constants {
-        static let anchorWidth: Float = 0.7
-        static let anchorHeight: Float = 0.01
+        static let anchorWidth: Float = 1.0
+        static let anchorHeight: Float = 0.02
     }
 }
