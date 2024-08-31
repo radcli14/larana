@@ -11,15 +11,13 @@ struct OverlayView: View {
     let state: GameState
     let onTapReset: () -> Void
     let onTapMove: () -> Void
-    let onTapRotate: () -> Void
-    
+
     var body: some View {
         VStack {
             Spacer()
             HStack(alignment: .center, spacing: Constants.buttonSpacing) {
                 resetAnchorButton
                 moveTableButton
-                rotateTableButton
             }
         }
     }
@@ -52,10 +50,6 @@ struct OverlayView: View {
         OverlayButton(text: "Move\nTable", activeForState: .move, action: { onTapMove() })
     }
     
-    private var rotateTableButton: some View {
-        OverlayButton(text: "Rotate\nTable", activeForState: .rotate, action: { onTapRotate() })
-    }
-    
     // MARK: - Constants
     
     private struct Constants {
@@ -68,7 +62,6 @@ struct OverlayView: View {
     OverlayView(
         state: .move,
         onTapReset: {},
-        onTapMove: {},
-        onTapRotate: {}
+        onTapMove: {}
     )
 }

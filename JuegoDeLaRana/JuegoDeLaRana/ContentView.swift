@@ -31,11 +31,6 @@ struct ContentView : View {
                         withAnimation {
                             viewModel.toggleMove()
                         }
-                    },
-                    onTapRotate: {
-                        withAnimation {
-                            viewModel.toggleRotate()
-                        }
                     }
                 )
             }

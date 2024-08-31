@@ -16,18 +16,14 @@ struct ARViewContainer: UIViewRepresentable {
     
     func makeUIView(context: Context) -> ARView {
         
-        let arView = ARView(frame: .zero)
+        //let arView = ARView(frame: .zero)
         
-        //arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
+        //
 
         // Add the horizontal plane anchor to the scene
-        arView.scene.anchors.append(viewModel.entities.anchor)
+        //arView.scene.anchors.append(viewModel.entities.anchor)
 
-        if let floor = viewModel.entities.floor {
-            arView.installGestures([.rotation, .translation], for: floor)
-            print("Added gestures to the floor")
-        }
-        return arView
+        return viewModel.entities.arView
         
     }
     

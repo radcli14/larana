@@ -10,6 +10,8 @@ import RealityKit
 
 struct ARViewEntities {
     
+    let arView = ARView(frame: .zero)
+    
     // Create horizontal plane anchor for the content
     let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(Constants.anchorWidth, Constants.anchorWidth)))
     var floor: ModelEntity?
@@ -19,6 +21,12 @@ struct ARViewEntities {
     init() {
         buildFloor()
         loadModel()
+        
+        // Add the horizontal plane anchor to the scene
+        arView.scene.anchors.append(anchor)
+        
+        // Optional: set debug options
+        //arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
     }
     
     // MARK: - Setup
@@ -88,6 +96,25 @@ struct ARViewEntities {
         // Add contact to La Rana
         let metalEntities = ["LaRanaFront", "LaRanaRear", "LaRanaLeft", "LaRanaRight"]
         addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
+    }
+    
+    // MARK: - Gestures
+    
+    var moveGestureRecognizers: [any EntityGestureRecognizer]?
+    
+    mutating func addMoveGesture() {
+        if let floor {
+            moveGestureRecognizers = arView.installGestures([.translation, .rotation], for: floor)
+        }
+    }
+    
+    mutating func removeMoveGesture() {
+        moveGestureRecognizers?.forEach { recognizer in
+            if let idx = arView.gestureRecognizers?.firstIndex(of: recognizer) {
+                arView.gestureRecognizers?.remove(at: idx)
+            }
+        }
+        moveGestureRecognizers = nil
     }
     
     // MARK: - Physics

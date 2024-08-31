@@ -23,12 +23,18 @@ class LaRanaViewModel: ObservableObject {
     func resetAnchor() {
         state = .resetting
     }
-    
+
     func toggleMove() {
         state = state == .move ? .play : .move
-    }
-    
-    func toggleRotate() {
-        state = state == .rotate ? .play : .rotate
+        
+        if let floor = entities.floor {
+            if state == .move {
+                entities.addMoveGesture()
+                print("Added gestures to the floor")
+            } else {
+                entities.removeMoveGesture()
+                print("Removed gestures from the floor")
+            }
+        }
     }
 }
