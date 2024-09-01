@@ -8,17 +8,22 @@
 import Foundation
 import RealityKit
 
+/// Provide a horizontal plane anchor for the content
+private func getNewAnchor(for width: Float) -> AnchorEntity {
+    AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(width, width)))
+}
+
 struct ARViewEntities {
     
     let arView = ARView(frame: .zero)
     
-    // Create horizontal plane anchor for the content
-    let anchor = AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(Constants.anchorWidth, Constants.anchorWidth)))
+    var anchor: AnchorEntity
     var floor: ModelEntity?
     var larana: Entity?
     var coin: Entity?
 
     init() {
+        anchor = getNewAnchor(for: Constants.anchorWidth)
         buildFloor()
         loadModel()
         
@@ -39,11 +44,11 @@ struct ARViewEntities {
             depth: Constants.anchorWidth,
             cornerRadius: 0.5 * Constants.anchorHeight
         )
-        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
+        let material = SimpleMaterial(color: .gray.withAlphaComponent(0.5), roughness: 0.15, isMetallic: true)
         floor = ModelEntity(mesh: mesh, materials: [material])
         if let floor {
             floor.addPhysics(material: Materials.metal, mode: .static)
-            floor.transform.translation.y = 0.5 * Constants.anchorHeight
+            //floor.transform.translation.y = 0.5 * Constants.anchorHeight
             anchor.addChild(floor)
         }
     }
@@ -96,6 +101,20 @@ struct ARViewEntities {
         // Add contact to La Rana
         let metalEntities = ["LaRanaFront", "LaRanaRear", "LaRanaLeft", "LaRanaRight"]
         addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
+    }
+    
+    // MARK: - Anchor
+    
+    mutating func resetAnchorLocation() {
+        let newAnchor = getNewAnchor(for: Constants.anchorWidth)
+        if let floor {
+            floor.removeFromParent()
+            floor.position = SIMD3<Float>(0.0, 0.0, 0.0)
+            newAnchor.addChild(floor)
+        }
+        arView.scene.anchors.remove(anchor)
+        arView.scene.anchors.append(newAnchor)
+        anchor = newAnchor
     }
     
     // MARK: - Gestures

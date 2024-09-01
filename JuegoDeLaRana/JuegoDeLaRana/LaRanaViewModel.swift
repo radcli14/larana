@@ -22,6 +22,8 @@ class LaRanaViewModel: ObservableObject {
     
     func resetAnchor() {
         state = .resetting
+        entities.resetAnchorLocation()
+        state = .play
     }
 
     func toggleMove() {
