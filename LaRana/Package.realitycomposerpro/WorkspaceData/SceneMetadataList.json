@@ -126,33 +126,6 @@
       [
         "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
-        "Materials"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
-        "Root",
-        "table",
-        "Geom"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
-        "Root"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
-        "Root",
         "PhysicsObjects"
       ],
       {
@@ -162,7 +135,15 @@
       [
         "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
-        "table"
+        "Materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
+        "Root"
       ],
       {
         "isExpanded" : true,

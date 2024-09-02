@@ -38,21 +38,15 @@ struct ARViewEntities {
 
     /// Create a floor that sits with the anchor to visualize its location
     mutating func buildFloor() {
-        let mesh = MeshResource.generateBox(
-            width: Constants.anchorWidth,
-            height: Constants.anchorHeight,
-            depth: Constants.anchorWidth,
-            cornerRadius: 0.5 * Constants.anchorHeight
-        )
+        let mesh = MeshResource.generatePlane(width: Constants.anchorWidth, depth: Constants.anchorWidth)
         let material = SimpleMaterial(color: .gray.withAlphaComponent(0.5), roughness: 0.15, isMetallic: true)
         floor = ModelEntity(mesh: mesh, materials: [material])
         if let floor {
             floor.addPhysics(material: Materials.metal, mode: .static)
-            //floor.transform.translation.y = 0.5 * Constants.anchorHeight
             anchor.addChild(floor)
         }
     }
-    
+
     mutating func loadModel() {
         // Load the La Rana scene
         if let larana = try? Entity.load(named: "TableAndLaRana.usdz") {
@@ -81,25 +75,35 @@ struct ARViewEntities {
         if let coin = larana.findEntity(named: "Coin") {
             // Set up the shape and physics for the coin
             coin.addPhysics(material: Materials.metal, mode: .dynamic)
-            
+            coin.components.set(PhysicsMotionComponent())
+                
             // TEMP: put the coin above the table so its visible and bounces a few times
             coin.position = SIMD3<Float>(0.1, 5.0, 0.0)
-            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            /*Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
                 print("coin position = \(coin.position)")
-            }
+            }*/
+            self.coin = coin
             
         } else {
             print("Coin entity not found.")
         }
+        
+        // Testing, seeing if behavior is reproduced with a programmatically generated coin
+        let mesh = MeshResource.generateSphere(radius: 0.015)
+        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
+        let generatedCoin = ModelEntity(mesh: mesh, materials: [material])
+        generatedCoin.addPhysics(material: Materials.metal, mode: .dynamic)
+        generatedCoin.position = SIMD3<Float>(-0.1, 2.0, 0.0)
+        generatedCoin.setParent(floor ?? anchor)
     }
     
     mutating func buildContactSurfaces(in larana: Entity) {
         // Add contact to the turf sections
-        let turfEntities = ["TableMainFront", "TableMainBack", "TableMainLeft", "TableMainRight"]
+        let turfEntities = ["TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019"]
         addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .static)
         
         // Add contact to La Rana
-        let metalEntities = ["LaRanaFront", "LaRanaRear", "LaRanaLeft", "LaRanaRight"]
+        let metalEntities = ["Mesh"]
         addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
     }
     
@@ -134,6 +138,34 @@ struct ARViewEntities {
             }
         }
         moveGestureRecognizers = nil
+    }
+    
+    mutating func tossCoin(with velocity: SIMD3<Float>) {
+        let cameraTransform = arView.cameraTransform
+        let cameraTransformFromFloor = getCameraTransformRelativeTo(entity: floor ?? anchor)
+        let mesh = MeshResource.generateSphere(radius: 0.015)
+        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
+        let generatedCoin = ModelEntity(mesh: mesh, materials: [material])
+        generatedCoin.addPhysics(material: Materials.metal, mode: .dynamic)
+        
+        generatedCoin.position = cameraTransformFromFloor.translation
+        
+        let velocityInWorldFrame = cameraTransform.matrix * SIMD4<Float>(velocity.x, velocity.y, velocity.z, 0.0)
+        generatedCoin.components[PhysicsMotionComponent.self] = PhysicsMotionComponent(
+            linearVelocity: SIMD3<Float>(velocityInWorldFrame.x, velocityInWorldFrame.y, velocityInWorldFrame.z)
+        )
+        
+        print("tossing coin at position \(generatedCoin.position) with velocity \(velocity)")
+        
+        generatedCoin.setParent(floor ?? anchor)
+    }
+    
+    func getCameraTransformRelativeTo(entity: Entity) -> Transform {
+        let cameraTransform = arView.cameraTransform
+        let entityTransform = entity.transformMatrix(relativeTo: nil)
+        let invertedEntityTransform = entityTransform.inverse
+        let relativeTransformMatrix = invertedEntityTransform * cameraTransform.matrix
+        return Transform(matrix: relativeTransformMatrix)
     }
     
     // MARK: - Physics
