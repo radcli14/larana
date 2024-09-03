@@ -21,6 +21,7 @@ struct ARViewEntities {
     var floor: ModelEntity?
     var larana: Entity?
     var coin: Entity?
+    var coins = [Entity]()
 
     init() {
         anchor = getNewAnchor(for: Constants.anchorWidth)
@@ -42,7 +43,7 @@ struct ARViewEntities {
         let material = SimpleMaterial(color: .gray.withAlphaComponent(0.5), roughness: 0.15, isMetallic: true)
         floor = ModelEntity(mesh: mesh, materials: [material])
         if let floor {
-            floor.addPhysics(material: Materials.metal, mode: .static)
+            floor.addPhysics(material: Materials.wood, mode: .static)
             anchor.addChild(floor)
         }
     }
@@ -71,30 +72,13 @@ struct ARViewEntities {
     }
     
     mutating func buildCoin(in larana: Entity) {
-        // Add contact to the coin
-        if let coin = larana.findEntity(named: "Coin") {
-            // Set up the shape and physics for the coin
-            coin.addPhysics(material: Materials.metal, mode: .dynamic)
-            coin.components.set(PhysicsMotionComponent())
-                
-            // TEMP: put the coin above the table so its visible and bounces a few times
-            coin.position = SIMD3<Float>(0.1, 5.0, 0.0)
-            /*Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-                print("coin position = \(coin.position)")
-            }*/
+        let name = "coin"
+        if let coin = larana.findEntity(named: name) {
             self.coin = coin
-            
+            coin.position = SIMD3<Float>(0, 0, 0)
         } else {
-            print("Coin entity not found.")
+            print("\(name) entity not found.")
         }
-        
-        // Testing, seeing if behavior is reproduced with a programmatically generated coin
-        let mesh = MeshResource.generateSphere(radius: 0.015)
-        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
-        let generatedCoin = ModelEntity(mesh: mesh, materials: [material])
-        generatedCoin.addPhysics(material: Materials.metal, mode: .dynamic)
-        generatedCoin.position = SIMD3<Float>(-0.1, 2.0, 0.0)
-        generatedCoin.setParent(floor ?? anchor)
     }
     
     mutating func buildContactSurfaces(in larana: Entity) {
@@ -141,23 +125,48 @@ struct ARViewEntities {
     }
     
     mutating func tossCoin(with velocity: SIMD3<Float>) {
+        // We get the current anchor here to ensure if there was a dynamic update, the correct anchor is parented
+        guard let currentAnchor = arView.scene.anchors.first else {
+            print("tossCoin couldn't get current anchor")
+            return
+        }
+        
+        // As long as the model has been loaded, we should be able to generate a fresh coin
+        guard let generatedCoin = coin?.clone(recursive: true) else {
+            print("tossCoin couldn't generate a new coin")
+            return
+        }
+        
+        // Use these to get the position of the camera relative to the anchor, and orientation in world frame
         let cameraTransform = arView.cameraTransform
-        let cameraTransformFromFloor = getCameraTransformRelativeTo(entity: floor ?? anchor)
-        let mesh = MeshResource.generateSphere(radius: 0.015)
-        let material = SimpleMaterial(color: .gray, roughness: 0.15, isMetallic: true)
-        let generatedCoin = ModelEntity(mesh: mesh, materials: [material])
+        let cameraTransformFromAnchor = getCameraTransformRelativeTo(entity: currentAnchor)
+
+        // Set the position of the fresh coin to slightly in front of and below the device prior to toss
+        generatedCoin.position = cameraTransformFromAnchor.translation
+        generatedCoin.position.y -= 0.2
+        generatedCoin.position.z -= 0.2
+        
+        // The flick velocity will set the velocity relative to the camera, but we need to rotate it into world frame
+        let velocityInWorldFrame = cameraTransform.matrix * SIMD4<Float>(velocity.x, velocity.y, velocity.z, 0.0)
+        
+        // Set a new PhysicsMotionComponent to add initial velocity, and randomize angular velocity
+        generatedCoin.components.set(PhysicsMotionComponent(
+            linearVelocity: SIMD3<Float>(velocityInWorldFrame.x, velocityInWorldFrame.y, velocityInWorldFrame.z),
+            angularVelocity: SIMD3<Float>(Float.random(in: -5...5), Float.random(in: -5...5), Float.random(in: -5...5))
+        ))
+        
+        // Add contact to the coin
         generatedCoin.addPhysics(material: Materials.metal, mode: .dynamic)
         
-        generatedCoin.position = cameraTransformFromFloor.translation
+        // Set the parent to the anchor
+        generatedCoin.setParent(currentAnchor)
         
-        let velocityInWorldFrame = cameraTransform.matrix * SIMD4<Float>(velocity.x, velocity.y, velocity.z, 0.0)
-        generatedCoin.components[PhysicsMotionComponent.self] = PhysicsMotionComponent(
-            linearVelocity: SIMD3<Float>(velocityInWorldFrame.x, velocityInWorldFrame.y, velocityInWorldFrame.z)
-        )
-        
-        print("tossing coin at position \(generatedCoin.position) with velocity \(velocity)")
-        
-        generatedCoin.setParent(floor ?? anchor)
+        // DEBUG
+        print("tossing coin \(generatedCoin) at position \(generatedCoin.position) with velocity \(velocity)")
+        print("anchors count = \(arView.scene.anchors.count)")
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
+            print("1 second later for coin \(generatedCoin.name) at position \(generatedCoin.position) with velocity \(velocity)")
+        })
     }
     
     func getCameraTransformRelativeTo(entity: Entity) -> Transform {
@@ -181,15 +190,15 @@ struct ARViewEntities {
     }
     
     private struct Materials {
-        static let metal = PhysicsMaterialResource.generate(friction: 0.3, restitution: 0.99)
-        static let turf = PhysicsMaterialResource.generate(friction: 0.7, restitution: 0.5)
+        static let metal = PhysicsMaterialResource.generate(friction: 0.3, restitution: 0.9)
+        static let turf = PhysicsMaterialResource.generate(friction: 0.8, restitution: 0.2)
         static let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
     }
     
     // MARK: - Constants
     
     private struct Constants {
-        static let anchorWidth: Float = 1.0
+        static let anchorWidth: Float = 0.7
         static let anchorHeight: Float = 0.02
     }
 }

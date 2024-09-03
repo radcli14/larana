@@ -8,9 +8,11 @@
     upAxis = "Y"
 )
 
+reorder rootPrims = ["Root", "coin"]
+
 def Xform "Root"
 {
-    reorder nameChildren = ["table", "larana", "Materials", "PhysicsObjects", "LaRanaLeft"]
+    reorder nameChildren = ["table", "larana", "Materials", "coin"]
     def "table" (
         active = true
         customData = {
@@ -477,38 +479,36 @@ def Xform "Root"
         }
     }
 
-    def Scope "PhysicsObjects" (
+    def "coin" (
         active = true
+        references = @coin.usdz@
     )
     {
-        reorder nameChildren = ["Coin", "TableMainFront", "TableMainBack", "TableMainLeft", "TableMainRight", "LaRanaFront", "LaRanaRear", "LaRanaLeft", "LaRanaRight"]
-        def Cylinder "Coin" (
-            active = true
-            prepend apiSchemas = ["MaterialBindingAPI"]
-        )
+        quatf xformOp:orient = (1, 0, 0, 0)
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0.1, 0.63, 0.1)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        over "Materials"
         {
-            uniform token axis = "Y"
-            double height = 0.005
-            rel material:binding = </Root/Materials/Iron> (
-                bindMaterialAs = "weakerThanDescendants"
-            )
-            double radius = 0.015
-            quatf xformOp:orient = (1, 0, 0, 0)
-            float3 xformOp:scale = (1, 1, 1)
-            float3 xformOp:translate = (0, 0.75, 0.1)
-            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
-
-            def Material "DefaultMaterial"
+            over "Iron"
             {
-                prepend token outputs:surface.connect = </Root/PhysicsObjects/Coin/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+                token outputs:mtlx:surface
+                token outputs:realitykit:vertex
+            }
+        }
 
-                def Shader "DefaultSurfaceShader"
-                {
-                    uniform token info:id = "UsdPreviewSurface"
-                    color3f inputs:diffuseColor = (1, 1, 1)
-                    float inputs:roughness = 0.75
-                    token outputs:surface
-                }
+        over "Geom"
+        {
+            over "Coin_Cylinder" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Iron> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+                float3 xformOp:translate = (0, 0, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
             }
         }
     }

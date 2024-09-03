@@ -126,16 +126,7 @@
       [
         "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
-        "PhysicsObjects"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
-        "Root",
-        "Materials"
+        "larana"
       ],
       {
         "isExpanded" : true,
