@@ -42,7 +42,7 @@ extension Entity {
         )
         components.set(physicsBody)
         
-        print("Physics and collision components added to \(self)")
+        print("Physics and collision components added to \(self.name)")
 
     }
 }
