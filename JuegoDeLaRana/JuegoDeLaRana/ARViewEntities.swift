@@ -29,6 +29,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         anchor = getNewAnchor(for: Constants.anchorWidth)
         buildFloor()
         loadModel()
+        addPointLight()
         
         // Add the horizontal plane anchor to the scene
         if let anchor {
@@ -46,10 +47,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     /// Create a floor that sits with the anchor to visualize its location
     func buildFloor() {
         let mesh = MeshResource.generatePlane(width: Constants.anchorWidth, depth: Constants.anchorWidth)
-        let material = SimpleMaterial(color: .gray.withAlphaComponent(0.5), roughness: 0.15, isMetallic: true)
+        let material = SimpleMaterial(color: .gray.withAlphaComponent(0.0), roughness: 0.15, isMetallic: true)
         floor = ModelEntity(mesh: mesh, materials: [material])
         if let floor, let anchor {
             floor.addPhysics(material: Materials.wood, mode: .static)
+            floor.position = SIMD3<Float>(0, 0.01, 0)
             anchor.addChild(floor)
         }
     }
@@ -94,6 +96,19 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Add contact to La Rana
         let metalEntities = ["Mesh"]
         addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
+    }
+    
+    func addPointLight() {
+        // Create a Point Light in front of La Rana
+        let lightEntity = Entity()
+        lightEntity.components.set(PointLightComponent(
+            color: .white,
+            intensity: 1000,
+            attenuationRadius: 0.5
+        ))
+        lightEntity.position = SIMD3<Float>(0, 0.8, 0.3)
+        lightEntity.setParent(floor ?? anchor)
+        
     }
     
     // MARK: - Anchor
@@ -252,8 +267,16 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
     }
 
+    var lastAnchorUpdate: Date?
+
     func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
         // Handle updated anchors
+        let now = Date()
+        if let lastUpdate = lastAnchorUpdate, now.timeIntervalSince(lastUpdate) < 1.0 {
+            return // Throttle updates to once per second
+        }
+        self.lastAnchorUpdate = now
+        
         for anchor in anchors {
             if let planeAnchor = anchor as? ARPlaneAnchor {
                 updatePlaneAnchor(planeAnchor)
