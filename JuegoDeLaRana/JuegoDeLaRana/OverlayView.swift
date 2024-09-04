@@ -9,16 +9,40 @@ import SwiftUI
 
 struct OverlayView: View {
     let state: GameState
+    let nThrows: Int
+    let nHitsLaRana: Int
+    let nHitsTarget: Int
     let onTapReset: () -> Void
     let onTapMove: () -> Void
 
     var body: some View {
         VStack {
             Spacer()
+            scoreBoard
             HStack(alignment: .center, spacing: Constants.buttonSpacing) {
                 resetAnchorButton
                 moveTableButton
             }
+        }
+    }
+    
+    // MARK: - Scoreboard
+    
+    private var scoreBoard: some View {
+        VStack {
+            Text("Score")
+                .font(.callout)
+            HStack {
+                Text("Throws: \(nThrows)")
+                Text("Hit La Rana: \(nHitsLaRana)")
+                Text("In the Hole: \(nHitsTarget)")
+            }
+            .font(.caption)
+        }
+        .padding(8)
+        .background {
+            RoundedRectangle(cornerRadius: 12)
+                .foregroundColor(Color(UIColor.systemBackground))
         }
     }
     
@@ -61,6 +85,9 @@ struct OverlayView: View {
 #Preview {
     OverlayView(
         state: .move,
+        nThrows: 0,
+        nHitsLaRana: 0,
+        nHitsTarget: 0,
         onTapReset: {},
         onTapMove: {}
     )

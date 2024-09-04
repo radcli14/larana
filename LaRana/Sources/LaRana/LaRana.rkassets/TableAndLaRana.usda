@@ -12,7 +12,7 @@ reorder rootPrims = ["Root", "coin"]
 
 def Xform "Root"
 {
-    reorder nameChildren = ["table", "larana", "Materials", "coin"]
+    reorder nameChildren = ["table", "larana", "Materials", "coin", "target"]
     def "table" (
         active = true
         customData = {
@@ -212,12 +212,12 @@ def Xform "Root"
     def "larana" (
         active = true
         customData = {
-            float3 rotationEulerHint = (0, 0.34906587, 0)
+            float3 rotationEulerHint = (0, 0.2617994, 0)
         }
         references = @reduced.usdz@
     )
     {
-        quatf xformOp:orient = (0.9848077, 0, 0.17364818, 0)
+        quatf xformOp:orient = (0.9914449, 0, 0.13052619, 0)
         float3 xformOp:scale = (0.2, 0.2, 0.2)
         float3 xformOp:translate = (0, 0.62, 0)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
@@ -370,6 +370,9 @@ def Xform "Root"
                 uniform token info:id = "UsdPreviewSurface"
                 color3f inputs:diffuseColor = (0.18, 0.18, 0.18)
                 color3f inputs:diffuseColor.connect = </Root/Materials/Iron/diffuseColor.outputs:rgb>
+                color3f inputs:emissiveColor = (0.24800742, 0.24800742, 0.24800742) (
+                    colorSpace = "srgb_displayp3"
+                )
                 float inputs:metallic = 0
                 float inputs:metallic.connect = </Root/Materials/Iron/metallic.outputs:r>
                 normal3f inputs:normal = (0, 0, 1)
@@ -509,6 +512,33 @@ def Xform "Root"
                 )
                 float3 xformOp:translate = (0, 0, 0)
                 uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+            }
+        }
+    }
+
+    def Sphere "target" (
+        active = true
+        prepend apiSchemas = ["MaterialBindingAPI"]
+    )
+    {
+        rel material:binding = </Root/Materials/Transparent> (
+            bindMaterialAs = "weakerThanDescendants"
+        )
+        double radius = 0.01
+        float3 xformOp:scale = (2, 1, 1)
+        float3 xformOp:translate = (0, 0.71435773, 0.041453905)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Material "DefaultMaterial"
+        {
+            prepend token outputs:surface.connect = </Root/target/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
+
+            def Shader "DefaultSurfaceShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (1, 1, 1)
+                float inputs:roughness = 0.75
+                token outputs:surface
             }
         }
     }

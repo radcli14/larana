@@ -14,13 +14,37 @@ enum GameState {
     case rotate
 }
 
+enum CoinHit: Int {
+    case ground = 0
+    case turf = 1
+    case larana = 2
+    case hole = 3
+}
+
 class LaRanaViewModel: ObservableObject {
     @Published var entities = ARViewEntities()
     @Published var state = GameState.play
+
+    // MARK: - Scores
     
+    @Published var nTossed = 0
+    @Published var coinHits = [String: CoinHit]()
+    var nHitLaRana: Int {
+        coinHits.values.filter { $0 == .larana }.count
+    }
+    var nHitTarget: Int {
+        coinHits.values.filter { $0 == .hole }.count
+    }
+
     // MARK: - Button Intents
     
     func resetAnchor() {
+        // Make sure gestures are removed if currently in move state
+        if state == .move {
+            toggleMove()
+        }
+        
+        // Update the anchor
         state = .resetting
         entities.resetAnchorLocation()
         state = .play
@@ -55,7 +79,25 @@ class LaRanaViewModel: ObservableObject {
             )
             
             // Toss the coin
-            entities.tossCoin(with: coinVelocity)
+            nTossed += 1
+            entities.tossCoin(with: coinVelocity, index: nTossed)
+        }
+    }
+    
+    // MARK: - Collisions
+    
+    func handleCollisions(between nameA: String, and nameB: String) {
+        if nameA.contains("coin") {
+            // Set the enum based on what the coin collided with
+            let thisHit: CoinHit = nameB == "target" ? .hole : nameB == "Mesh" ? .larana : nameB.contains("Turf") ? .turf : .ground
+            
+            if let coinScore = coinHits[nameA], thisHit.rawValue <= coinScore.rawValue {
+                // The existing hit score exceeded this one, don't update
+            } else {
+                // This is either a first hit or a better score than previous hit, update the score
+                coinHits[nameA] = thisHit
+                print("\(nameA) collided with \(thisHit)")
+            }
         }
     }
     

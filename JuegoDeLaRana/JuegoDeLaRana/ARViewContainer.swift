@@ -31,6 +31,7 @@ struct ARViewContainer: UIViewRepresentable {
         
         init(viewModel: LaRanaViewModel) {
             self.viewModel = viewModel
+            setupCollisionHandling()
         }
         
         @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
@@ -39,6 +40,25 @@ struct ARViewContainer: UIViewRepresentable {
                 let velocity = gesture.velocity(in: gesture.view)
                 self.viewModel.handleFlickGesture(location: location, velocity: velocity)
             }
+        }
+        
+        func setupCollisionHandling() {
+            viewModel.entities.arView.scene.subscribe(to: CollisionEvents.Began.self) { event in
+                self.viewModel.handleCollisions(between: event.entityA.name, and: event.entityB.name)
+                /*let entityA = event.entityA
+                let entityB = event.entityB
+                
+                //print("Collision detected:")
+                //if let nameA = entityA.name {
+                if entityA.name == "coin" {
+                    print("Entity \(entityA.name) collided with \(entityB.name)")
+                }
+                //}
+                /*if let nameB = entityB.name {
+                    print("Entity \(nameB) collided with \(entityA.name ?? "an unnamed entity")")
+                }*/
+                 */
+            }.store(in: &cancellables)
         }
     }
 

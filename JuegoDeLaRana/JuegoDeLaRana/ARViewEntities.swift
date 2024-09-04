@@ -90,12 +90,21 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     func buildContactSurfaces(in larana: Entity) {
         // Add contact to the turf sections
-        let turfEntities = ["TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019"]
+        let turfEntities = ["TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019",
+                            "target"] // Include the target, want a dull bounce (if any) when the coin hits it
         addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .static)
         
         // Add contact to La Rana
         let metalEntities = ["Mesh"]
         addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
+        
+        // Add contact to the wood frame
+        let woodEntities: [String] = [
+            "ChuteFront_Cube_011", "ChuteSlope_Cube_012", "ChuteRight_Cube_013", "ChuteLeft_Cube_014",
+            "LegFrontRight_Cube", "LegFrontLeft_Cube_001", "LegRearRight_Cube_002", "LegRearLeft_Cube_003",
+            "SupportLowerFront_Cube_008", "SupportLowerRear_Cube_009", "SupportLowerCenter_Cube_010"
+        ]
+        addPhysics(to: woodEntities, in: larana, material: Materials.wood, mode: .static)
     }
     
     func addPointLight() {
@@ -108,7 +117,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         ))
         lightEntity.position = SIMD3<Float>(0, 0.8, 0.3)
         lightEntity.setParent(floor ?? anchor)
-        
     }
     
     // MARK: - Anchor
@@ -150,7 +158,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         Float.random(in: Constants.angularRateRange)
     }
     
-    func tossCoin(with velocity: SIMD3<Float>) {
+    func tossCoin(with velocity: SIMD3<Float>, index: Int? = nil) {
         // We get the current anchor here to ensure if there was a dynamic update, the correct anchor is parented
         guard let currentAnchor = arView.scene.anchors.first else {
             print("tossCoin couldn't get current anchor")
@@ -161,6 +169,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         guard let generatedCoin = coin?.clone(recursive: true) else {
             print("tossCoin couldn't generate a new coin")
             return
+        }
+        
+        // Name the coin based on its index
+        if let index {
+            generatedCoin.name = "coin\(index)"
         }
         
         // Use these to get the position of the camera relative to the anchor, and orientation in world frame
@@ -188,11 +201,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         generatedCoin.setParent(currentAnchor)
         
         // DEBUG
-        print("tossing \(generatedCoin) at position \(generatedCoin.position) with velocity \(velocity)")
+        /*print("tossing \(generatedCoin) at position \(generatedCoin.position) with velocity \(velocity)")
         print("anchors count = \(arView.scene.anchors.count)")
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
             print("1 second later for \(generatedCoin.name) at position \(generatedCoin.position) with velocity \(velocity)")
-        })
+        })*/
     }
     
     func getCameraTransformRelativeTo(entity: Entity) -> Transform {
@@ -244,14 +257,16 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // This plane already existed, update it with new dimensions
         if let anchorEntity = arView.scene.findEntity(named: anchor.identifier.uuidString) {
             if let plane = anchorEntity.children.first as? ModelEntity {
+                // Update the transform (position and rotation) of the anchor entity
+                anchorEntity.position = SIMD3<Float>(anchor.center.x, 0, anchor.center.z)
+                let anchorRotation = simd_quatf(anchor.transform)
+                anchorEntity.orientation = anchorRotation
+              
                 // Update the plane's mesh to match the new dimensions
                 plane.model = ModelComponent(
                     mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height),
                     materials: [SimpleMaterial(color: .white.withAlphaComponent(0.0), roughness: 1, isMetallic: false)]
                 )
-                
-                // Update the position if the anchor has moved
-                anchorEntity.position = SIMD3<Float>(anchor.center.x, 0, anchor.center.z)
             }
         }
     }

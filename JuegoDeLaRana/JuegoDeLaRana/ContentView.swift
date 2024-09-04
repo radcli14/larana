@@ -22,6 +22,9 @@ struct ContentView : View {
             .overlay {
                 OverlayView(
                     state: viewModel.state,
+                    nThrows: viewModel.nTossed,
+                    nHitsLaRana: viewModel.nHitLaRana,
+                    nHitsTarget: viewModel.nHitTarget,
                     onTapReset: {
                         withAnimation {
                             viewModel.resetAnchor()

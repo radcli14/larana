@@ -126,7 +126,17 @@
       [
         "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
-        "larana"
+        "table",
+        "Geom"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
+        "Root",
+        "table"
       ],
       {
         "isExpanded" : true,
