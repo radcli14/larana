@@ -51,8 +51,7 @@ struct ContentView : View {
             .padding(.bottom, Constants.headerBottomPadding)
             .background {
                 RoundedRectangle(cornerRadius: Constants.backgroundCornerRadius)
-                    .foregroundColor(.accentColor)
-                    .shadow(radius: Constants.headerShadowRadius)
+                    .foregroundColor(Color(UIColor.systemBackground).opacity(Constants.backgroundOpacity))
             }
     }
     
@@ -68,11 +67,11 @@ struct ContentView : View {
         static let headerTopPadding: CGFloat = 56
         static let headerBottomPadding: CGFloat = 12
         static let backgroundCornerRadius: CGFloat = 56
-        static let headerShadowRadius: CGFloat = 16
+        static let backgroundOpacity = 0.5
     }
     
     private var headerFontSize: CGFloat {
-        UIFont.preferredFont(forTextStyle: .largeTitle).pointSize
+        UIFont.preferredFont(forTextStyle: .title3).pointSize
     }
 }
 
