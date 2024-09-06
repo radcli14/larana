@@ -18,14 +18,21 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     let arView = ARView(frame: .zero)
     
+    // Entities
     var anchor: AnchorEntity?
     var floor: ModelEntity?
     var larana: Entity?
     var coin: Entity?
     var coins = [Entity]()
+    
+    // Collisions
+    let tableGroup = CollisionGroup(rawValue: 1 << 0)
+    let coinGroup = CollisionGroup(rawValue: 1 << 1)
+    let generalGroup = CollisionGroup(rawValue: 1 << 2)
 
     override init() {
         super.init()
+
         anchor = getNewAnchor(for: Constants.anchorWidth)
         buildFloor()
         loadModel()
@@ -92,12 +99,12 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Add contact to the turf sections
         let turfEntities = ["TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019",
                             "target"] // Include the target, want a dull bounce (if any) when the coin hits it
-        addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .static)
+        addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .static, collisionGroup: tableGroup)
         
         // Add contact to La Rana
         let metalEntities = ["Mesh"]
-        addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static)
-        
+        addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static, collisionGroup: tableGroup)
+
         // Add contact to the wood frame
         let woodEntities: [String] = [
             "ChuteFront_Cube_011", "ChuteSlope_Cube_012", "ChuteRight_Cube_013", "ChuteLeft_Cube_014",
@@ -197,15 +204,23 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Add contact to the coin
         generatedCoin.addPhysics(material: Materials.metal, mode: .dynamic)
         
-        // Set the parent to the anchor
+        // Set the parent to the anchor so that it exists in the scene
         generatedCoin.setParent(currentAnchor)
         
-        // DEBUG
-        /*print("tossing \(generatedCoin) at position \(generatedCoin.position) with velocity \(velocity)")
-        print("anchors count = \(arView.scene.anchors.count)")
-        Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
-            print("1 second later for \(generatedCoin.name) at position \(generatedCoin.position) with velocity \(velocity)")
-        })*/
+        // Add to the array of coins, for clearing in the future
+        coins.append(generatedCoin)
+    }
+    
+    func addFilterAfterHitTarget(to name: String) {
+        guard let currentAnchor = arView.scene.anchors.first else {
+            print("addFilterAfterHitTarget couldn't get current anchor")
+            return
+        }
+
+        if let coin = currentAnchor.findEntity(named: name) {
+            addCollisionFilter(to: coin, group: coinGroup, mask: .all.subtracting(tableGroup))
+            reduceVelocity(of: coin, anchor: currentAnchor)
+        }
     }
     
     func getCameraTransformRelativeTo(entity: Entity) -> Transform {
@@ -218,13 +233,45 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     // MARK: - Physics
     
-    func addPhysics(to listOfEntityNames: [String], in mainEntity: Entity, material: PhysicsMaterialResource, mode: PhysicsBodyMode) {
+    func addPhysics(
+        to listOfEntityNames: [String],
+        in mainEntity: Entity,
+        material: PhysicsMaterialResource,
+        mode: PhysicsBodyMode,
+        collisionGroup: CollisionGroup? = nil,
+        collisionMask: CollisionGroup? = nil
+    ) {
         for name in listOfEntityNames {
             if let entity = mainEntity.findEntity(named: name) {
                 entity.addPhysics(material: material, mode: mode)
+                addCollisionFilter(to: entity, group: collisionGroup ?? generalGroup, mask: collisionMask ?? .all)
             } else {
                 print("Entity \(name) not found")
             }
+        }
+    }
+    
+    func addCollisionFilter(to entity: Entity, group: CollisionGroup = .all, mask: CollisionGroup = .all) {
+        if var collision = entity.components[CollisionComponent.self] as? CollisionComponent {
+            collision.filter = CollisionFilter(group: group, mask: mask)
+            entity.components[CollisionComponent.self] = collision
+            print("Collision filter \(collision.filter) added to \(entity.name)")
+        }
+    }
+    
+    /// Reduce the coin velocity to make it more likely to drop into the chute after hitting the target
+    private func reduceVelocity(of coin: Entity, anchor: Entity) {
+        DispatchQueue.main.async {
+            anchor.removeChild(coin)
+            if let motion = coin.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent {
+                coin.components.remove(PhysicsMotionComponent.self)
+                coin.components.set(PhysicsMotionComponent(
+                    linearVelocity: 0.25 * motion.linearVelocity,
+                    angularVelocity: motion.angularVelocity
+                ))
+                print("After hitting the target, set coin velocity to \(motion.linearVelocity)")
+            }
+            anchor.addChild(coin)
         }
     }
     

@@ -98,6 +98,11 @@ class LaRanaViewModel: ObservableObject {
                 coinHits[nameA] = thisHit
                 print("\(nameA) collided with \(thisHit)")
             }
+            
+            if thisHit == .hole {
+                // Add filter so it falls through the table
+                entities.addFilterAfterHitTarget(to: nameA)
+            }
         }
     }
     

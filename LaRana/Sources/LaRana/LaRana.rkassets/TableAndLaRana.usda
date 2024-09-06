@@ -23,6 +23,7 @@ def Xform "Root"
     {
         quatf xformOp:orient = (0.70710677, 0, -0.70710677, 0)
         float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0, 0, 0)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
         over "Geom"
@@ -370,15 +371,14 @@ def Xform "Root"
                 uniform token info:id = "UsdPreviewSurface"
                 color3f inputs:diffuseColor = (0.18, 0.18, 0.18)
                 color3f inputs:diffuseColor.connect = </Root/Materials/Iron/diffuseColor.outputs:rgb>
-                color3f inputs:emissiveColor = (0.24800742, 0.24800742, 0.24800742) (
+                color3f inputs:emissiveColor = (0, 0, 0) (
                     colorSpace = "srgb_displayp3"
                 )
-                float inputs:metallic = 0
-                float inputs:metallic.connect = </Root/Materials/Iron/metallic.outputs:r>
+                float inputs:ior = 0
+                float inputs:metallic = 0.1
                 normal3f inputs:normal = (0, 0, 1)
                 normal3f inputs:normal.connect = </Root/Materials/Iron/normal.outputs:rgb>
                 float inputs:occlusion = 1
-                float inputs:occlusion.connect = </Root/Materials/Iron/occlusion.outputs:r>
                 float inputs:roughness = 0.5
                 float inputs:roughness.connect = </Root/Materials/Iron/roughness.outputs:r>
                 token outputs:surface
@@ -387,7 +387,7 @@ def Xform "Root"
             def Shader "diffuseColor"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_baseColor.png@
+                asset inputs:file = @Stainless_Steel_Brushed_1k_8b_XHBN0Fa/textures/Stainless_Steel_Brushed_diffuse.png@
                 float2 inputs:st.connect = </Root/Materials/Iron/diffuseColor/TexCoordReader.outputs:result>
                 color3f outputs:rgb
 
@@ -402,7 +402,7 @@ def Xform "Root"
             def Shader "roughness"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_roughness.png@
+                asset inputs:file = @Stainless_Steel_Brushed_1k_8b_XHBN0Fa/textures/Stainless_Steel_Brushed_roughness.png@
                 float2 inputs:st.connect = </Root/Materials/Iron/roughness/TexCoordReader.outputs:result>
                 float outputs:r
 
@@ -432,7 +432,7 @@ def Xform "Root"
             def Shader "normal"
             {
                 uniform token info:id = "UsdUVTexture"
-                asset inputs:file = @Cast_Iron_Damaged_1k_8b/textures/Cast_Iron_Damaged_normal.png@
+                asset inputs:file = @Stainless_Steel_Brushed_1k_8b_XHBN0Fa/textures/Stainless_Steel_Brushed_normal.png@
                 float2 inputs:st.connect = </Root/Materials/Iron/normal/TexCoordReader.outputs:result>
                 normal3f outputs:rgb
 
