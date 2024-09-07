@@ -251,6 +251,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
     }
     
+    /// Sets the collision group and the mask of an entity, used to disable collisions of the coin with the table to emulate dropping through the target hole
     func addCollisionFilter(to entity: Entity, group: CollisionGroup = .all, mask: CollisionGroup = .all) {
         if var collision = entity.components[CollisionComponent.self] as? CollisionComponent {
             collision.filter = CollisionFilter(group: group, mask: mask)
@@ -262,11 +263,23 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     /// Reduce the coin velocity to make it more likely to drop into the chute after hitting the target
     private func reduceVelocity(of coin: Entity, anchor: Entity) {
         DispatchQueue.main.async {
+            // Need to remove child before setting the motion component then add after to make it take effect
             anchor.removeChild(coin)
             if let motion = coin.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent {
-                coin.components.remove(PhysicsMotionComponent.self)
+                // To slow down the coin motion, we multiply by 0.25
+                var newVelocity = 0.25 * motion.linearVelocity
+                
+                // If we find the hole entity, direct the motion vector into that hole, with the same velocity
+                if let tableHole = anchor.findEntity(named: "TableHole_Cylinder") {
+                    let coinPosition = coin.position(relativeTo: anchor)
+                    let holePosition = tableHole.position(relativeTo: anchor)
+                    let directionToHole = normalize(holePosition - coinPosition)
+                    newVelocity = directionToHole * length(newVelocity)
+                }
+                
+                // Update the linear velocity, but keep angular velocity the same
                 coin.components.set(PhysicsMotionComponent(
-                    linearVelocity: 0.25 * motion.linearVelocity,
+                    linearVelocity: newVelocity,
                     angularVelocity: motion.angularVelocity
                 ))
                 print("After hitting the target, set coin velocity to \(motion.linearVelocity)")
@@ -281,7 +294,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         static let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
     }
     
-    // MARK: Plane Detection
+    // MARK: - Particle Effects
+    
+    // TODO: Build particle effects when support comes with XCode 16
+    
+    // MARK: - Plane Detection
     
     func addPlaneDetection() {
         let configuration = ARWorldTrackingConfiguration()
