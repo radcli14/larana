@@ -6,13 +6,7 @@
 //
 
 import Foundation
-
-enum GameState {
-    case play
-    case resetting
-    case move
-    case rotate
-}
+import SwiftUI
 
 enum CoinHit: Int {
     case ground = 0
@@ -21,10 +15,27 @@ enum CoinHit: Int {
     case hole = 3
 }
 
+enum GameState: String {
+    case new = "New"
+    case loading = "3D model is loading ..."
+    case play = "To play: flick to toss a coin"
+    case resetting = "Resetting the anchor ..."
+    case move = "To move: drag with one finger, or rotate with two fingers"
+}
+
 class LaRanaViewModel: ObservableObject {
     @Published var entities = ARViewEntities()
-    @Published var state = GameState.play
+    @Published var state: GameState = .new
 
+    init() {
+        state = .loading
+        entities.build {
+            withAnimation {
+                self.state = .play
+            }
+        }
+    }
+    
     // MARK: - Scores
     
     @Published var nTossed = 0
@@ -45,13 +56,18 @@ class LaRanaViewModel: ObservableObject {
         }
         
         // Update the anchor
-        state = .resetting
-        entities.resetAnchorLocation()
-        state = .play
+        withAnimation {
+            state = .resetting
+            entities.resetAnchorLocation()
+            state = .play
+        }
     }
 
     func toggleMove() {
-        state = state == .move ? .play : .move
+        print("Tapped toggleMove with state = \(state)")
+        withAnimation {
+            state = state == .move ? .play : .move
+        }
         
         if entities.floor != nil {
             if state == .move {
@@ -79,7 +95,9 @@ class LaRanaViewModel: ObservableObject {
             )
             
             // Toss the coin
-            nTossed += 1
+            withAnimation {
+                nTossed += 1
+            }
             entities.tossCoin(with: coinVelocity, index: nTossed)
         }
     }
@@ -95,7 +113,14 @@ class LaRanaViewModel: ObservableObject {
                 // The existing hit score exceeded this one, don't update
             } else {
                 // This is either a first hit or a better score than previous hit, update the score
-                coinHits[nameA] = thisHit
+                withAnimation {
+                    coinHits[nameA] = thisHit
+                }
+                entities.generateFloatingText(
+                    text: thisHit == .hole ? "¡exito!" : thisHit == .larana ? "¡cerca!" : "fallaste",
+                    color: thisHit == .hole ? "green" : thisHit == .larana ? "white" : "red",
+                    name: nameA
+                )
                 print("\(nameA) collided with \(thisHit)")
             }
             

@@ -19,6 +19,13 @@ struct OverlayView: View {
     var body: some View {
         VStack {
             Spacer()
+            if state == .loading {
+                ProgressView()
+                    .scaleEffect(Constants.progressViewScale)
+            }
+            Spacer()
+            Text(state.rawValue)
+                .font(.caption)
             HStack(alignment: .center, spacing: Constants.buttonSpacing) {
                 resetAnchorButton
                 scoreBoard
@@ -110,6 +117,7 @@ struct OverlayView: View {
     // MARK: - Constants
     
     private struct Constants {
+        static let progressViewScale = 6.28
         static let buttonSpacing: CGFloat = 12
         static let textContentWidth: CGFloat = 64
         static let backgroundPadding: CGFloat = 8

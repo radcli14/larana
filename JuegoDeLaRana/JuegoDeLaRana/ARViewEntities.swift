@@ -17,7 +17,7 @@ private func getNewAnchor(for width: Float) -> AnchorEntity {
 class ARViewEntities: NSObject, ARSessionDelegate {
     
     let arView = ARView(frame: .zero)
-    
+
     // Entities
     var anchor: AnchorEntity?
     var floor: ModelEntity?
@@ -33,23 +33,29 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     override init() {
         super.init()
 
-        anchor = getNewAnchor(for: Constants.anchorWidth)
-        buildFloor()
-        loadModel()
-        addPointLight()
-        
-        // Add the horizontal plane anchor to the scene
-        if let anchor {
-            arView.scene.anchors.append(anchor)
-        }
-        
-        addPlaneDetection()
-        
         // Optional: set debug options
         //arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
     }
     
     // MARK: - Setup
+    
+    func build(onComplete: @escaping () -> Void) {
+        DispatchQueue.main.async {
+            self.anchor = getNewAnchor(for: Constants.anchorWidth)
+            self.buildFloor()
+            self.loadModel()
+            self.addPointLight()
+            
+            // Add the horizontal plane anchor to the scene
+            if let anchor = self.anchor {
+                self.arView.scene.anchors.append(anchor)
+            }
+            
+            self.addPlaneDetection()
+            
+            onComplete()
+        }
+    }
     
     /// Create a floor that sits with the anchor to visualize its location
     func buildFloor() {
@@ -63,10 +69,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
     }
 
+    /// Load the La Rana scene
     func loadModel() {
-        // Load the La Rana scene
         if let larana = try? Entity.load(named: "TableAndLaRana.usdz") {
-            buildModel(for: larana)
+            self.buildModel(for: larana)
         }
     }
     
@@ -99,11 +105,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Add contact to the turf sections
         let turfEntities = ["TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019",
                             "target"] // Include the target, want a dull bounce (if any) when the coin hits it
-        addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .static, collisionGroup: tableGroup)
+        addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .kinematic, collisionGroup: tableGroup)
         
         // Add contact to La Rana
         let metalEntities = ["Mesh"]
-        addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .static, collisionGroup: tableGroup)
+        addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .kinematic, collisionGroup: tableGroup)
 
         // Add contact to the wood frame
         let woodEntities: [String] = [
@@ -111,7 +117,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             "LegFrontRight_Cube", "LegFrontLeft_Cube_001", "LegRearRight_Cube_002", "LegRearLeft_Cube_003",
             "SupportLowerFront_Cube_008", "SupportLowerRear_Cube_009", "SupportLowerCenter_Cube_010"
         ]
-        addPhysics(to: woodEntities, in: larana, material: Materials.wood, mode: .static)
+        addPhysics(to: woodEntities, in: larana, material: Materials.wood, mode: .kinematic)
     }
     
     func addPointLight() {
@@ -187,11 +193,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let cameraTransform = arView.cameraTransform
         let cameraTransformFromAnchor = getCameraTransformRelativeTo(entity: currentAnchor)
 
-        // Set the position of the fresh coin to slightly in front of and below the device prior to toss
+        // Set the position of the fresh coin to slightly below the device prior to toss
         generatedCoin.position = cameraTransformFromAnchor.translation
-        generatedCoin.position.y -= 0.2
-        generatedCoin.position.z -= 0.2
-        
+        generatedCoin.position.y -= 0.1
+
         // The flick velocity will set the velocity relative to the camera, but we need to rotate it into world frame
         let velocityInWorldFrame = cameraTransform.matrix * SIMD4<Float>(velocity.x, velocity.y, velocity.z, 0.0)
         
@@ -207,7 +212,15 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Set the parent to the anchor so that it exists in the scene
         generatedCoin.setParent(currentAnchor)
         
-        // Add to the array of coins, for clearing in the future
+        // Add to the array of coins, and clear if there are too many in play
+        if coins.count >= Constants.maxNumberOfCoins {
+            // Look for a coin that is either on the ground (<0.2) or on the table (>0.6), avoid removing coins that are in the chute
+            if let idx = coins.firstIndex(where: { $0.position.y < 0.2 }) ?? coins.firstIndex(where: { $0.position.y > 0.6 }) {
+                let oldCoin = coins.remove(at: idx)
+                oldCoin.removeFromParent()
+                print("Removed \(oldCoin.name), coins.count = \(coins.count)")
+            }
+        }
         coins.append(generatedCoin)
     }
     
@@ -294,7 +307,62 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         static let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
     }
     
-    // MARK: - Particle Effects
+    // MARK: - Effects
+    
+    private var lastTextEntity: ModelEntity? = nil
+    private var lastCoinName: String? = nil
+
+    /// Generates the text in the AR view notifying the user what their last tossed coin collided with
+    func generateFloatingText(text: String, color: String = "white", name: String? = nil) {
+        guard let target = anchor?.findEntity(named: "target") else {
+            print("generatingFloatingText could not obtain the target entity")
+            return
+        }
+        
+        // Set material to be the specified color depending on event type
+        let material = SimpleMaterial(
+            color: color == "white" ? .white : color == "green" ? .green : .red, roughness: 0, isMetallic: false
+        )
+        
+        // The frame is set to be fairly large to contain the whole text
+        let containerFrame = CGRect(x: -1, y: -1, width: 2.0, height: 1)
+
+        // Generate the mesh and use it to create the entity
+        let textMesh = MeshResource
+            .generateText(text,
+                          extrusionDepth: 0.01,
+                          font: .systemFont(ofSize: 0.015),
+                          containerFrame: containerFrame,
+                          alignment: .center,
+                          lineBreakMode: .byWordWrapping
+        )
+        let textEntity = ModelEntity(mesh: textMesh, materials: [material])
+
+        // Initial position of the floating text is just above the target
+        textEntity.position = SIMD3<Float>()
+        textEntity.position.y += 0.15
+        textEntity.setParent(target)
+        
+        // The text is animated to make it grow, move upward, and towards the player
+        let animationTransform = Transform(
+            scale: SIMD3<Float>(repeating: 6.28),
+            rotation: simd_quatf(angle: 0, axis: SIMD3<Float>(0, 1, 0)),
+            translation: SIMD3<Float>(x: 0, y: 0.3, z: 0.2)
+        )
+        textEntity.move(to: animationTransform, relativeTo: target, duration: 1.0)
+        
+        // If this coin was the same as for the last floating text, remove that one and replace it with this
+        if name == lastCoinName {
+            lastTextEntity?.removeFromParent()
+        }
+        lastTextEntity = textEntity
+        lastCoinName = name
+        
+        // Schedule the text to disappear after a second
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+            textEntity.removeFromParent()
+        }
+   }
     
     // TODO: Build particle effects when support comes with XCode 16
     
@@ -309,7 +377,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
 
     func addPlaneAnchor(_ anchor: ARPlaneAnchor) {
         // This is a new plane, give it a mesh and add contact physics
-        let plane = ModelEntity(mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height), materials: [SimpleMaterial(color: .white.withAlphaComponent(0.0), roughness: 1, isMetallic: false)])
+        let plane = ModelEntity(
+            mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height),
+            //materials: [SimpleMaterial(color: .white.withAlphaComponent(0.0), roughness: 1, isMetallic: false)]
+            materials: [OcclusionMaterial()]
+        )
         let anchorEntity = AnchorEntity(world: anchor.transform)
         anchorEntity.name = anchor.identifier.uuidString
         anchorEntity.addChild(plane)
@@ -393,5 +465,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         static let anchorHeight: Float = 0.02
         static let coinName = "coin"
         static let angularRateRange = Float(-50)...Float(50)
+        static let maxNumberOfCoins = 20
     }
 }

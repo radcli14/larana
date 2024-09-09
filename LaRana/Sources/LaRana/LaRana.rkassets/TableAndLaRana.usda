@@ -513,6 +513,15 @@ def Xform "Root"
                 float3 xformOp:translate = (0, 0, 0)
                 uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
             }
+
+            over "Coin_Cylinder_002" (
+                prepend apiSchemas = ["MaterialBindingAPI"]
+            )
+            {
+                rel material:binding = </Root/Materials/Iron> (
+                    bindMaterialAs = "weakerThanDescendants"
+                )
+            }
         }
     }
 
