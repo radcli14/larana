@@ -99,6 +99,8 @@ class LaRanaViewModel: ObservableObject {
     // MARK: - Gesture Intents
     
     ///. When the user taps during reset anchor mode, this resets the anchor and puts the game in play mode
+    /// - Parameters:
+    ///   - location: The location where the user tapped
     func handleTapGesture(location: CGPoint) {
         if state == .resetting {
             if entities.resetAnchorLocation(to: location) { // Checks that the new anchor succeeded
@@ -109,6 +111,10 @@ class LaRanaViewModel: ObservableObject {
         }
     }
     
+    /// When the game is in play mode and the user flicks upward from the bottom of the screen, toss a coin
+    /// - Parameters:
+    ///   - location: The ending location of the flick in pixel units
+    ///   - velocity: The velocity of the flick in pixel units
     func handleFlickGesture(location: CGPoint, velocity: CGPoint) {
         // If we are in play mode, and the gesture is a flick upwards, toss a coin
         if state == .play && velocity.y < Constants.flickThreshold {

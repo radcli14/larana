@@ -8,6 +8,13 @@
 import SwiftUI
 
 /// Overlay of the user controls and scoring displayed on the bottom of the screen
+/// - Parameters:
+///   - state: State of the game, such as `.loading`, `.resetting`, `.play`, `.move`, ...
+///   - nThrows: Number of coins that the user has tossed
+///   - nHitsLaRana: Number of coins that have hit the frog statue
+///   - nHitsTarget: Number of coins that have gone in the frog's mouth
+///   - onTapReset: Callback when the user taps the reset button
+///   - onTapMove: Callback when the user taps the move button
 struct OverlayView: View {
     let state: GameState
     let nThrows: Int
@@ -16,6 +23,11 @@ struct OverlayView: View {
     let onTapReset: () -> Void
     let onTapMove: () -> Void
 
+    // State variables for the animation for changes in state
+    @State private var stateDisplayPadding: CGFloat = Constants.stateDisplayDefaultPadding
+    @State private var stateDisplayFontStyle: Font = .caption
+    @State private var stateDisplayTextColor: Color = .primary
+    
     var body: some View {
         VStack {
             Spacer()
@@ -24,8 +36,7 @@ struct OverlayView: View {
                     .scaleEffect(Constants.progressViewScale)
             }
             Spacer()
-            Text(state.rawValue)
-                .font(.caption)
+            stateDisplay
             HStack(alignment: .center, spacing: Constants.buttonSpacing) {
                 resetAnchorButton
                 scoreBoard
@@ -35,6 +46,41 @@ struct OverlayView: View {
             .background {
                 RoundedRectangle(cornerRadius: Constants.backgroundRadius)
                     .foregroundColor(Color(UIColor.systemBackground).opacity(Constants.backgroundOpacity))
+            }
+        }
+    }
+    
+    // MARK: - State
+    
+    private var stateDisplay: some View {
+        Text(state.rawValue)
+            .multilineTextAlignment(.center)
+            .padding(stateDisplayPadding)
+            .font(stateDisplayFontStyle)
+            .foregroundColor(stateDisplayTextColor)
+            .onChange(of: state) {
+                animateStateChange()
+            }
+    }
+    
+    private func animateStateChange() {
+        // After a delay, grow to emphasize the state description text
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Constants.durationForFade) {
+            withAnimation(.easeInOut(duration: Constants.durationForFade)) {
+                // Increase size and change color
+                stateDisplayPadding = Constants.stateDisplayAnimatePadding
+                stateDisplayFontStyle = .headline
+                stateDisplayTextColor = .accentColor
+            }
+        }
+
+        // Return to original size and color after a delay
+        let deadline = DispatchTime.now() + 2*Constants.durationForFade + Constants.durationForLargeText
+        DispatchQueue.main.asyncAfter(deadline: deadline) {
+            withAnimation(.easeInOut(duration: Constants.durationForFade)) {
+                stateDisplayPadding = Constants.stateDisplayDefaultPadding
+                stateDisplayFontStyle = .caption
+                stateDisplayTextColor = .primary
             }
         }
     }
@@ -118,6 +164,10 @@ struct OverlayView: View {
     
     private struct Constants {
         static let progressViewScale = 6.28
+        static let stateDisplayDefaultPadding: CGFloat = 0
+        static let stateDisplayAnimatePadding: CGFloat = 24
+        static let durationForLargeText = 1.69
+        static let durationForFade = 0.69
         static let buttonSpacing: CGFloat = 12
         static let textContentWidth: CGFloat = 64
         static let backgroundPadding: CGFloat = 8
