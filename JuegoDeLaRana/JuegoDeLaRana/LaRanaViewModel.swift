@@ -19,7 +19,7 @@ enum GameState: String {
     case new = "New"
     case loading = "3D model is loading ..."
     case play = "To play: flick to toss a coin"
-    case resetting = "Resetting the anchor ..."
+    case resetting = "Tap to place the table"
     case move = "To move: drag with one finger, or rotate with two fingers"
 }
 
@@ -31,7 +31,7 @@ class LaRanaViewModel: ObservableObject {
         state = .loading
         entities.build {
             withAnimation {
-                self.state = .play
+                self.state = .resetting
             }
         }
     }
@@ -50,16 +50,22 @@ class LaRanaViewModel: ObservableObject {
     // MARK: - Button Intents
     
     func resetAnchor() {
-        // Make sure gestures are removed if currently in move state
-        if state == .move {
-            toggleMove()
-        }
-        
-        // Update the anchor
         withAnimation {
-            state = .resetting
-            entities.resetAnchorLocation()
-            state = .play
+            // Make sure flick gestures are removed if currently in move state, will switch to resetting state
+            if state == .move {
+                toggleMove()
+            }
+            
+            if state == .play {
+                // Put the app into a state where the user will tap to update the anchor
+                entities.hideTable()
+                state = .resetting
+                
+            } else if state == .resetting {
+                // Reset the anchor to an automatically determined position
+                entities.resetAnchorLocation()
+                state = .play
+            }
         }
     }
 
@@ -81,6 +87,14 @@ class LaRanaViewModel: ObservableObject {
     }
     
     // MARK: - Gesture Intents
+    
+    ///. When the user taps during reset anchor mode, this resets the anchor and puts the game in play mode
+    func handleTapGesture(location: CGPoint) {
+        entities.resetAnchorLocation()
+        withAnimation {
+            state = .play
+        }
+    }
     
     func handleFlickGesture(location: CGPoint, velocity: CGPoint) {
         // If we are in play mode, and the gesture is a flick upwards, toss a coin

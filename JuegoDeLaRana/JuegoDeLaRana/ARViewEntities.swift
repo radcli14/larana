@@ -21,6 +21,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     // Entities
     var anchor: AnchorEntity?
     var floor: ModelEntity?
+    var occluder: ModelEntity?
     var larana: Entity?
     var coin: Entity?
     var coins = [Entity]()
@@ -59,13 +60,23 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     /// Create a floor that sits with the anchor to visualize its location
     func buildFloor() {
-        let mesh = MeshResource.generatePlane(width: Constants.anchorWidth, depth: Constants.anchorWidth)
-        let material = SimpleMaterial(color: .gray.withAlphaComponent(0.0), roughness: 0.15, isMetallic: true)
-        floor = ModelEntity(mesh: mesh, materials: [material])
+        // Generate the floor, which is a simple square plane that sits under the table, and can be repositioned
+        let floorMesh = MeshResource.generatePlane(width: Constants.anchorWidth, depth: Constants.anchorWidth)
+        let floorMaterial = SimpleMaterial(color: .gray.withAlphaComponent(0.0), roughness: 0.15, isMetallic: true)
+        floor = ModelEntity(mesh: floorMesh, materials: [floorMaterial])
         if let floor, let anchor {
             floor.addPhysics(material: Materials.wood, mode: .static)
             floor.position = SIMD3<Float>(0, 0.01, 0)
             anchor.addChild(floor)
+        }
+        
+        // Generate the occluder, which is a cube that obscures the table during times when you are setting a new anchor
+        let occluderMesh = MeshResource.generateBox(size: 2 * Constants.anchorWidth)
+        let occluderMaterial = OcclusionMaterial()
+        occluder = ModelEntity(mesh: occluderMesh, materials: [occluderMaterial])
+        occluder?.position.y = Constants.anchorWidth
+        if let occluder, let floor {
+            occluder.setParent(floor)
         }
     }
 
@@ -77,13 +88,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     func buildModel(for larana: Entity) {
-        // Append the loaded model to the anchor (or floor if available, for drag to reposition)
-        if let floor {
-            floor.addChild(larana)
-        } else if let anchor {
-            anchor.addChild(larana)
-        }
-        
         // Add physics to the coin and table contact surfaces
         buildCoin(in: larana)
         buildContactSurfaces(in: larana)
@@ -146,6 +150,31 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
         arView.scene.anchors.append(newAnchor)
         anchor = newAnchor
+        
+        makeTableVisible()
+    }
+    
+    func makeTableVisible() {
+        if let occluder, let floor, let larana {
+            larana.setParent(floor)
+            let transform = Transform(translation: SIMD3<Float>(0, -Constants.anchorWidth, 0))
+            occluder.move(to: transform, relativeTo: floor, duration: 1.0)
+            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                occluder.removeFromParent()
+            }
+        }
+    }
+    
+    func hideTable() {
+        if let occluder, let floor, let larana {
+            occluder.setParent(floor)
+            occluder.position = SIMD3<Float>(0, -Constants.anchorWidth, 0)
+            let transform = Transform(translation: SIMD3<Float>(0, Constants.anchorWidth, 0))
+            occluder.move(to: transform, relativeTo: floor, duration: 1.0)
+            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                larana.removeFromParent()
+            }
+        }
     }
     
     // MARK: - Gestures
@@ -280,7 +309,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             anchor.removeChild(coin)
             if let motion = coin.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent {
                 // To slow down the coin motion, we multiply by 0.25
-                var newVelocity = 0.25 * motion.linearVelocity
+                var newVelocity = 0.2 * motion.linearVelocity
                 
                 // If we find the hole entity, direct the motion vector into that hole, with the same velocity
                 if let tableHole = anchor.findEntity(named: "TableHole_Cylinder") {
@@ -330,7 +359,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Generate the mesh and use it to create the entity
         let textMesh = MeshResource
             .generateText(text,
-                          extrusionDepth: 0.01,
+                          extrusionDepth: 0.005,
                           font: .systemFont(ofSize: 0.015),
                           containerFrame: containerFrame,
                           alignment: .center,
@@ -339,14 +368,13 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let textEntity = ModelEntity(mesh: textMesh, materials: [material])
 
         // Initial position of the floating text is just above the target
-        textEntity.position = SIMD3<Float>()
-        textEntity.position.y += 0.15
+        textEntity.position = SIMD3<Float>(0, 0.15, 0)
         textEntity.setParent(target)
         
         // The text is animated to make it grow, move upward, and towards the player
         let animationTransform = Transform(
             scale: SIMD3<Float>(repeating: 6.28),
-            rotation: simd_quatf(angle: 0, axis: SIMD3<Float>(0, 1, 0)),
+            //rotation: simd_quatf(angle: 0, axis: SIMD3<Float>(0, 1, 0)),
             translation: SIMD3<Float>(x: 0, y: 0.3, z: 0.2)
         )
         textEntity.move(to: animationTransform, relativeTo: target, duration: 1.0)

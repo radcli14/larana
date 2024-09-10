@@ -16,7 +16,11 @@ struct ARViewContainer: UIViewRepresentable {
     
     func makeUIView(context: Context) -> ARView {
         
-        // Add the pan gesture recognizer
+        // Add the tap gesture recognizer used for setting the table position
+        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture(_:)))
+        viewModel.entities.arView.addGestureRecognizer(tapGesture)
+        
+        // Add the pan gesture recognizer used for flicking the coins
         let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
         viewModel.entities.arView.addGestureRecognizer(panGesture)
                 
@@ -34,6 +38,13 @@ struct ARViewContainer: UIViewRepresentable {
             setupCollisionHandling()
         }
         
+        @objc func handleTapGesture(_ gesture: UITapGestureRecognizer) {
+            if gesture.state == .ended {
+                let location = gesture.location(in: gesture.view)
+                self.viewModel.handleTapGesture(location: location)
+            }
+        }
+        
         @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
             if gesture.state == .ended {
                 let location = gesture.location(in: gesture.view)
@@ -45,19 +56,6 @@ struct ARViewContainer: UIViewRepresentable {
         func setupCollisionHandling() {
             viewModel.entities.arView.scene.subscribe(to: CollisionEvents.Began.self) { event in
                 self.viewModel.handleCollisions(between: event.entityA.name, and: event.entityB.name)
-                /*let entityA = event.entityA
-                let entityB = event.entityB
-                
-                //print("Collision detected:")
-                //if let nameA = entityA.name {
-                if entityA.name == "coin" {
-                    print("Entity \(entityA.name) collided with \(entityB.name)")
-                }
-                //}
-                /*if let nameB = entityB.name {
-                    print("Entity \(nameB) collided with \(entityA.name ?? "an unnamed entity")")
-                }*/
-                 */
             }.store(in: &cancellables)
         }
     }
