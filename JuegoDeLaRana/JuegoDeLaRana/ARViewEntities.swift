@@ -11,7 +11,7 @@ import RealityKit
 
 /// Provide a horizontal plane anchor for the content
 private func getNewAnchor(for width: Float) -> AnchorEntity {
-    AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(width, width)))
+    return AnchorEntity(.plane(.horizontal, classification: .any, minimumBounds: SIMD2<Float>(width, width)))
 }
 
 class ARViewEntities: NSObject, ARSessionDelegate {
@@ -138,8 +138,25 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     // MARK: - Anchor
     
-    func resetAnchorLocation() {
-        let newAnchor = getNewAnchor(for: Constants.anchorWidth)
+    /// Sets the anchor location based on either a raycast to the point a user tapped, or a default
+    /// - Parameters:
+    ///     - location: The location where the user tapped
+    /// - Returns: Whether the new anchor was successfully placed
+    func resetAnchorLocation(to location: CGPoint? = nil) -> Bool {
+        var newAnchor: AnchorEntity?
+        if let location, let ray = arView.raycast(from: location, allowing: .estimatedPlane, alignment: .horizontal).first {
+            // Set the location of the anchor based upon a raycast to a point that the user tapped on screen
+            newAnchor = AnchorEntity(raycastResult: ray)
+            print("Set new anchor at \(newAnchor!.position)")
+        } else {
+            // Set the location of the anchor based upon the default
+            newAnchor = getNewAnchor(for: Constants.anchorWidth)
+        }
+        guard let newAnchor else {
+            print("failed to get a new anchor")
+            return false
+        }
+        
         if let floor {
             floor.removeFromParent()
             floor.position = SIMD3<Float>(0.0, 0.0, 0.0)
@@ -152,6 +169,8 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         anchor = newAnchor
         
         makeTableVisible()
+        
+        return true
     }
     
     func makeTableVisible() {
@@ -181,12 +200,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     var moveGestureRecognizers: [any EntityGestureRecognizer]?
     
+    /// Enables gestures to allow single finger move or two finger rotate to all entities that are child to the floor, specifically the table and  La Rana model
     func addMoveGesture() {
         if let floor {
             moveGestureRecognizers = arView.installGestures([.translation, .rotation], for: floor)
         }
     }
     
+    /// Removes gestures to allow moving the table and La Rana
     func removeMoveGesture() {
         moveGestureRecognizers?.forEach { recognizer in
             if let idx = arView.gestureRecognizers?.firstIndex(of: recognizer) {
@@ -196,13 +217,19 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         moveGestureRecognizers = nil
     }
     
+    /// Provides a single random float component to be applied to a randomized coin angular velocity
     private var randomAngularRate: Float {
         Float.random(in: Constants.angularRateRange)
     }
     
+    /// Provides three random float components to be applied to a randomized coin angular velocity
+    private var randomAngularRateVector: SIMD3<Float> {
+        return SIMD3<Float>(randomAngularRate, randomAngularRate, randomAngularRate)
+    }
+    
     func tossCoin(with velocity: SIMD3<Float>, index: Int? = nil) {
         // We get the current anchor here to ensure if there was a dynamic update, the correct anchor is parented
-        guard let currentAnchor = arView.scene.anchors.first else {
+        guard let anchor else {
             print("tossCoin couldn't get current anchor")
             return
         }
@@ -220,7 +247,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         // Use these to get the position of the camera relative to the anchor, and orientation in world frame
         let cameraTransform = arView.cameraTransform
-        let cameraTransformFromAnchor = getCameraTransformRelativeTo(entity: currentAnchor)
+        let cameraTransformFromAnchor = getCameraTransformRelativeTo(entity: anchor)
 
         // Set the position of the fresh coin to slightly below the device prior to toss
         generatedCoin.position = cameraTransformFromAnchor.translation
@@ -232,14 +259,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Set a new PhysicsMotionComponent to add initial velocity, and randomize angular velocity
         generatedCoin.components.set(PhysicsMotionComponent(
             linearVelocity: SIMD3<Float>(velocityInWorldFrame.x, velocityInWorldFrame.y, velocityInWorldFrame.z),
-            angularVelocity: SIMD3<Float>(randomAngularRate, randomAngularRate, randomAngularRate)
+            angularVelocity: randomAngularRateVector
         ))
         
         // Add contact to the coin
         generatedCoin.addPhysics(material: Materials.metal, mode: .dynamic)
         
         // Set the parent to the anchor so that it exists in the scene
-        generatedCoin.setParent(currentAnchor)
+        generatedCoin.setParent(anchor)
         
         // Add to the array of coins, and clear if there are too many in play
         if coins.count >= Constants.maxNumberOfCoins {
@@ -254,14 +281,9 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     func addFilterAfterHitTarget(to name: String) {
-        guard let currentAnchor = arView.scene.anchors.first else {
-            print("addFilterAfterHitTarget couldn't get current anchor")
-            return
-        }
-
-        if let coin = currentAnchor.findEntity(named: name) {
+        if let anchor, let coin = anchor.findEntity(named: name) {
             addCollisionFilter(to: coin, group: coinGroup, mask: .all.subtracting(tableGroup))
-            reduceVelocity(of: coin, anchor: currentAnchor)
+            reduceVelocity(of: coin, anchor: anchor)
         }
     }
     
@@ -398,42 +420,48 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     func addPlaneDetection() {
         let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.horizontal]
+        configuration.planeDetection = [.horizontal, .vertical]
         arView.session.delegate = self
         arView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
     }
+    
+    let planeMaterial = OcclusionMaterial()
+    var planeAnchors: [String: ARPlaneAnchor] = [:]
+    var entityMap: [String: AnchorEntity] = [:]
 
-    func addPlaneAnchor(_ anchor: ARPlaneAnchor) {
-        // This is a new plane, give it a mesh and add contact physics
+    func updatePlaneAnchor(_ anchor: ARPlaneAnchor) {
+        let id = anchor.identifier.uuidString
+        
+        // If there's a pre-existing anchor entity with this same id, remove it from the scene as it will be replaced
+        if planeAnchors[id] != nil {
+            entityMap[id]?.removeFromParent()
+        }
+
+        // Create a plane mesh and add contact physics
         let plane = ModelEntity(
             mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height),
-            //materials: [SimpleMaterial(color: .white.withAlphaComponent(0.0), roughness: 1, isMetallic: false)]
-            materials: [OcclusionMaterial()]
+            materials: [planeMaterial]
         )
         let anchorEntity = AnchorEntity(world: anchor.transform)
         anchorEntity.name = anchor.identifier.uuidString
         anchorEntity.addChild(plane)
         plane.addPhysics(material: Materials.wood, mode: .static)
+        
+        // Add to the scene and entity map for future reference
         arView.scene.addAnchor(anchorEntity)
+
+        // add to the planeAnchors and entity map for future reference
+        planeAnchors[id] = anchor
+        entityMap[id] = anchorEntity
     }
     
-    func updatePlaneAnchor(_ anchor: ARPlaneAnchor) {
-        // This plane already existed, update it with new dimensions
-        if let anchorEntity = arView.scene.findEntity(named: anchor.identifier.uuidString) {
-            if let plane = anchorEntity.children.first as? ModelEntity {
-                // Update the transform (position and rotation) of the anchor entity
-                anchorEntity.position = SIMD3<Float>(anchor.center.x, 0, anchor.center.z)
-                let anchorRotation = simd_quatf(anchor.transform)
-                anchorEntity.orientation = anchorRotation
-              
-                // Update the plane's mesh to match the new dimensions
-                plane.model = ModelComponent(
-                    mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height),
-                    materials: [SimpleMaterial(color: .white.withAlphaComponent(0.0), roughness: 1, isMetallic: false)]
-                )
-            }
-        }
+    func removePlaneAnchor(_ anchor: ARPlaneAnchor) {
+        let id = anchor.identifier.uuidString
+        entityMap[id]?.removeFromParent()
+        entityMap.removeValue(forKey: id)
+        planeAnchors.removeValue(forKey: id)
     }
+
     
     // MARK: - ARSessionDelegate Methods
 
@@ -441,7 +469,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Handle newly added anchors
         for anchor in anchors {
             if let planeAnchor = anchor as? ARPlaneAnchor {
-                addPlaneAnchor(planeAnchor)
+                updatePlaneAnchor(planeAnchor)
             }
         }
     }
@@ -466,9 +494,8 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
         for anchor in anchors {
             // Remove the corresponding entity from the scene
-            if let planeAnchor = anchor as? ARPlaneAnchor,
-               let entity = arView.scene.findEntity(named: planeAnchor.identifier.uuidString) {
-                entity.removeFromParent()
+            if let planeAnchor = anchor as? ARPlaneAnchor { //},
+                removePlaneAnchor(planeAnchor)
             }
         }
     }

@@ -63,18 +63,28 @@ class LaRanaViewModel: ObservableObject {
                 
             } else if state == .resetting {
                 // Reset the anchor to an automatically determined position
-                entities.resetAnchorLocation()
-                state = .play
+                if entities.resetAnchorLocation() { // Checks that the new anchor succeeded
+                    state = .play
+                }
             }
         }
     }
 
     func toggleMove() {
         print("Tapped toggleMove with state = \(state)")
+        // Update the state based on the user tap
         withAnimation {
-            state = state == .move ? .play : .move
+            if state == .move {
+                state = .play
+            } else if state == .play {
+                state = .move
+            } else {
+                // This toggle should have no effect if not in either the play or move state, such as if you tapped during the loading or reset state
+                return
+            }
         }
         
+        // Add or remove gestures from the table
         if entities.floor != nil {
             if state == .move {
                 entities.addMoveGesture()
@@ -90,9 +100,12 @@ class LaRanaViewModel: ObservableObject {
     
     ///. When the user taps during reset anchor mode, this resets the anchor and puts the game in play mode
     func handleTapGesture(location: CGPoint) {
-        entities.resetAnchorLocation()
-        withAnimation {
-            state = .play
+        if state == .resetting {
+            if entities.resetAnchorLocation(to: location) { // Checks that the new anchor succeeded
+                withAnimation {
+                    state = .play
+                }
+            }
         }
     }
     
