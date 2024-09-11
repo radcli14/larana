@@ -24,6 +24,7 @@
 		8AD85B8A2C82147400537BB7 /* Entity+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B892C82147400537BB7 /* Entity+Extensions.swift */; };
 		8AD85B8C2C8214EF00537BB7 /* ARViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */; };
 		8AD85B8E2C82166900537BB7 /* ARViewEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */; };
+		8AD85B902C91BB7300537BB7 /* SIMD3+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 		8AD85B892C82147400537BB7 /* Entity+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Entity+Extensions.swift"; sourceTree = "<group>"; };
 		8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewContainer.swift; sourceTree = "<group>"; };
 		8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewEntities.swift; sourceTree = "<group>"; };
+		8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SIMD3+Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +122,7 @@
 				8AD85B4C2C7E550600537BB7 /* ContentView.swift */,
 				8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */,
 				8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */,
+				8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */,
 				8AD85B892C82147400537BB7 /* Entity+Extensions.swift */,
 				8AD85B762C7E817700537BB7 /* OverlayView.swift */,
 				8AD85B872C8209C200537BB7 /* LaRanaViewModel.swift */,
@@ -304,6 +307,7 @@
 				8AD85B772C7E817700537BB7 /* OverlayView.swift in Sources */,
 				8AD85B8E2C82166900537BB7 /* ARViewEntities.swift in Sources */,
 				8AD85B4D2C7E550600537BB7 /* ContentView.swift in Sources */,
+				8AD85B902C91BB7300537BB7 /* SIMD3+Extensions.swift in Sources */,
 				8AD85B4B2C7E550600537BB7 /* AppDelegate.swift in Sources */,
 				8AD85B882C8209C200537BB7 /* LaRanaViewModel.swift in Sources */,
 				8AD85B8C2C8214EF00537BB7 /* ARViewContainer.swift in Sources */,

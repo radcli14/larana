@@ -66,7 +66,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         floor = ModelEntity(mesh: floorMesh, materials: [floorMaterial])
         if let floor, let anchor {
             floor.addPhysics(material: Materials.wood, mode: .static)
-            floor.position = SIMD3<Float>(0, 0.01, 0)
+            floor.position = SIMD3<Float>(0, -0.01, 0)
             anchor.addChild(floor)
         }
         
@@ -74,7 +74,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let occluderMesh = MeshResource.generateBox(size: 2 * Constants.anchorWidth)
         let occluderMaterial = OcclusionMaterial()
         occluder = ModelEntity(mesh: occluderMesh, materials: [occluderMaterial])
-        occluder?.position.y = Constants.anchorWidth
+        occluder?.position.y = -Constants.anchorWidth
         if let occluder, let floor {
             occluder.setParent(floor)
         }
@@ -159,7 +159,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         if let floor {
             floor.removeFromParent()
-            floor.position = SIMD3<Float>(0.0, 0.0, 0.0)
+            floor.position = SIMD3<Float>(0.0, -0.01, 0.0)
             newAnchor.addChild(floor)
         }
         if let anchor {
@@ -174,22 +174,18 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     func makeTableVisible() {
-        if let occluder, let floor, let larana {
+        if let floor, let larana {
             larana.setParent(floor)
-            let transform = Transform(translation: SIMD3<Float>(0, -Constants.anchorWidth, 0))
-            occluder.move(to: transform, relativeTo: floor, duration: 1.0)
-            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-                occluder.removeFromParent()
-            }
+            larana.position.y = -Constants.laranaHeight
+            let transform = Transform(translation: SIMD3<Float>())
+            larana.move(to: transform, relativeTo: floor, duration: 1.0)
         }
     }
     
     func hideTable() {
-        if let occluder, let floor, let larana {
-            occluder.setParent(floor)
-            occluder.position = SIMD3<Float>(0, -Constants.anchorWidth, 0)
-            let transform = Transform(translation: SIMD3<Float>(0, Constants.anchorWidth, 0))
-            occluder.move(to: transform, relativeTo: floor, duration: 1.0)
+        if let floor, let larana {
+            let transform = Transform(translation: SIMD3<Float>(0, -Constants.laranaHeight, 0))
+            larana.move(to: transform, relativeTo: floor, duration: 1.0)
             Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
                 larana.removeFromParent()
             }
@@ -278,6 +274,32 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             }
         }
         coins.append(generatedCoin)
+    }
+    
+    /// Checks whether the coin is expected to go into the frog's mouth based on its velocity direction relative to the center of the hole
+    func isOnTarget(coin name: String) -> Bool {
+        if let coin = anchor?.findEntity(named: name),
+           let motion = coin.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent,
+           let target = anchor?.findEntity(named: "target"),
+            let hole = anchor?.findEntity(named: "TableHole_Cylinder") {
+            let relativePositionToTarget = target.position - coin.position
+            let relativePositionToHole = hole.position - coin.position
+            let lateralDistance = sqrt(pow(relativePositionToTarget.x, 2) + pow(relativePositionToTarget.y, 2))
+            let dot1 = relativePositionToTarget.normalized.dot(motion.linearVelocity.normalized)
+            let dot2 = relativePositionToHole.normalized.dot(motion.linearVelocity.normalized)
+            
+            // These equations are determined in the ipynb in the Analysis folder,
+            // use a logarithmic regression to predict probability that the coin
+            // would go through the frog's mouth and hit the target.
+            //intercept = -0.8044900150549832, coefficients = [-0.26646102  1.57960177 -0.08407506] // 30 points
+            //intercept = -0.9201886638897043, coefficients = [-0.15180935  1.90207864 -0.13622121] // 40 points
+            //intercept = -0.7288543149756059, coefficients = [-0.19913931  2.19779176 -0.16881278] // 50 points
+            let gama = -0.73 - 0.2*dot1 + 2.2*dot2 - 0.17*lateralDistance
+            let prob = 1 / (1 + exp(-gama))
+            print("\(coin.name) relativePosition = \(relativePositionToTarget), velocity = \(motion.linearVelocity), dot1 = \(dot1), dot2 = \(dot2), lateralDistance = \(lateralDistance), prob = \(prob)")
+            return prob > 0.5 // (dot1 > 0.0 || dot2 > 0.0) && motion.linearVelocity.z < 0
+        }
+        return true
     }
     
     func addFilterAfterHitTarget(to name: String) {
@@ -396,7 +418,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // The text is animated to make it grow, move upward, and towards the player
         let animationTransform = Transform(
             scale: SIMD3<Float>(repeating: 6.28),
-            //rotation: simd_quatf(angle: 0, axis: SIMD3<Float>(0, 1, 0)),
             translation: SIMD3<Float>(x: 0, y: 0.3, z: 0.2)
         )
         textEntity.move(to: animationTransform, relativeTo: target, duration: 1.0)
@@ -442,8 +463,9 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height),
             materials: [planeMaterial]
         )
+        plane.name = id
         let anchorEntity = AnchorEntity(world: anchor.transform)
-        anchorEntity.name = anchor.identifier.uuidString
+        anchorEntity.name = id
         anchorEntity.addChild(plane)
         plane.addPhysics(material: Materials.wood, mode: .static)
         
@@ -518,6 +540,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     private struct Constants {
         static let anchorWidth: Float = 0.7
         static let anchorHeight: Float = 0.02
+        static let laranaHeight: Float = 0.9
         static let coinName = "coin"
         static let angularRateRange = Float(-50)...Float(50)
         static let maxNumberOfCoins = 20

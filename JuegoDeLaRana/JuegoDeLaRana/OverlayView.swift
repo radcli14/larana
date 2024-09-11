@@ -64,6 +64,11 @@ struct OverlayView: View {
     }
     
     private func animateStateChange() {
+        // Before animation, reset modifiers to defaults
+        stateDisplayPadding = Constants.stateDisplayDefaultPadding
+        stateDisplayFontStyle = .caption
+        stateDisplayTextColor = .primary
+        
         // After a delay, grow to emphasize the state description text
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Constants.durationForFade) {
             withAnimation(.easeInOut(duration: Constants.durationForFade)) {

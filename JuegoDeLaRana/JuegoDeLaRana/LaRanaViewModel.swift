@@ -162,27 +162,37 @@ class LaRanaViewModel: ObservableObject {
     func handleCollisions(between nameA: String, and nameB: String) {
         if nameA.contains("coin") {
             // Set the enum based on what the coin collided with
-            let thisHit: CoinHit = nameB == "target" ? .hole : nameB == "Mesh" ? .larana : nameB.contains("Turf") ? .turf : .ground
+            var thisHit: CoinHit = nameB == "target" ? .hole : nameB == "Mesh" ? .larana : nameB.contains("Turf") ? .turf : .ground
             
             if let coinScore = coinHits[nameA], thisHit.rawValue <= coinScore.rawValue {
                 // The existing hit score exceeded this one, don't update
             } else {
+                // Contacted target, check whether it is "going in" to the target.
+                // If yes, then set up so that it falls in, otherwise toggle to a .larana hit
+                var changedScore = false
+                if thisHit == .hole {
+                    if entities.isOnTarget(coin: nameA) {
+                        // Add filter so it falls through the table
+                        entities.addFilterAfterHitTarget(to: nameA)
+                    } else {
+                        thisHit = .larana
+                        changedScore = true
+                    }
+                }
+                
                 // This is either a first hit or a better score than previous hit, update the score
                 withAnimation {
                     coinHits[nameA] = thisHit
                 }
+                
+                // Provide the alert text and color that will float above the target
                 let alert = CoinHitAlert(for: thisHit)
                 entities.generateFloatingText(
-                    text: alert.announcement,
+                    text: alert.announcement + (changedScore ? "***" : ""),
                     color: alert.color,
                     name: nameA
                 )
                 print("\(nameA) collided with \(thisHit)")
-            }
-            
-            if thisHit == .hole {
-                // Add filter so it falls through the table
-                entities.addFilterAfterHitTarget(to: nameA)
             }
         }
     }
