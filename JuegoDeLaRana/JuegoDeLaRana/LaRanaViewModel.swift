@@ -15,6 +15,28 @@ enum CoinHit: Int {
     case hole = 3
 }
 
+struct CoinHitAlert {
+    var announcement: String = ""
+    var color: String = ""
+    
+    init(for hit: CoinHit) {
+        announcement = hit == .hole ? success : hit == .larana ? close : miss
+        color = hit == .hole ? "green" : hit == .larana ? "white" : "red"
+    }
+    
+    var success: String {
+        ["¡ÉXITO!", "¡EN EL HOYO!", "¡GOOOOOOL!", "¡ENHORABUENA!", "¡MUY BIEN!", "¡BUENO!", "¡BUENISIMO!"].randomElement() ?? "¡EXITO!"
+    }
+    
+    var close: String {
+        ["¡cerca!", "¡casi!", "¡bien!", "¡mejor!", "¡buen intento!"].randomElement() ?? "¡cerca!"
+    }
+    
+    var miss: String {
+        ["fallaste", "fuera", "lejos", "malo", "peor", "no soporto"].randomElement() ?? "fallaste"
+    }
+}
+
 enum GameState: String {
     case new = "New"
     case loading = "3D model is loading ..."
@@ -149,9 +171,10 @@ class LaRanaViewModel: ObservableObject {
                 withAnimation {
                     coinHits[nameA] = thisHit
                 }
+                let alert = CoinHitAlert(for: thisHit)
                 entities.generateFloatingText(
-                    text: thisHit == .hole ? "¡exito!" : thisHit == .larana ? "¡cerca!" : "fallaste",
-                    color: thisHit == .hole ? "green" : thisHit == .larana ? "white" : "red",
+                    text: alert.announcement,
+                    color: alert.color,
                     name: nameA
                 )
                 print("\(nameA) collided with \(thisHit)")
