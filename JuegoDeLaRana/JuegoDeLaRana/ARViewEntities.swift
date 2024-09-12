@@ -34,6 +34,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     override init() {
         super.init()
 
+        // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
+        //arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
+        arView.environment.sceneUnderstanding.options.insert(.occlusion)
+        arView.environment.sceneUnderstanding.options.insert(.physics)
         // Optional: set debug options
         //arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
     }
@@ -52,7 +56,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
                 self.arView.scene.anchors.append(anchor)
             }
             
-            self.addPlaneDetection()
+            //self.addPlaneDetection()
             
             onComplete()
         }
@@ -60,20 +64,19 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     /// Create a floor that sits with the anchor to visualize its location
     func buildFloor() {
-        // Generate the floor, which is a simple square plane that sits under the table, and can be repositioned
-        let floorMesh = MeshResource.generatePlane(width: Constants.anchorWidth, depth: Constants.anchorWidth)
-        let floorMaterial = SimpleMaterial(color: .gray.withAlphaComponent(0.0), roughness: 0.15, isMetallic: true)
-        floor = ModelEntity(mesh: floorMesh, materials: [floorMaterial])
+        // Generate the floor, which is created as a `ModelEntity` so that it satisfies `HasCollision` which is used for dragging the table
+        let floorMesh = MeshResource.generatePlane(width: 0.001, depth: 0.001)
+        let occlusionMaterial = OcclusionMaterial()
+        floor = ModelEntity(mesh: floorMesh, materials: [OcclusionMaterial()])
         if let floor, let anchor {
             floor.addPhysics(material: Materials.wood, mode: .static)
-            floor.position = SIMD3<Float>(0, -0.01, 0)
+            floor.position = SIMD3<Float>()
             anchor.addChild(floor)
         }
         
         // Generate the occluder, which is a cube that obscures the table during times when you are setting a new anchor
-        let occluderMesh = MeshResource.generateBox(size: 2 * Constants.anchorWidth)
-        let occluderMaterial = OcclusionMaterial()
-        occluder = ModelEntity(mesh: occluderMesh, materials: [occluderMaterial])
+        let occluderMesh = MeshResource.generateBox(width: Constants.anchorWidth, height: Constants.anchorWidth, depth: 2 * Constants.anchorWidth)
+        occluder = ModelEntity(mesh: occluderMesh, materials: [OcclusionMaterial()])
         occluder?.position.y = -Constants.anchorWidth
         if let occluder, let floor {
             occluder.setParent(floor)
@@ -159,7 +162,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         if let floor {
             floor.removeFromParent()
-            floor.position = SIMD3<Float>(0.0, -0.01, 0.0)
+            floor.position = SIMD3<Float>() //(0.0, -0.01, 0.0)
             newAnchor.addChild(floor)
         }
         if let anchor {
@@ -436,104 +439,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
    }
     
     // TODO: Build particle effects when support comes with XCode 16
-    
-    // MARK: - Plane Detection
-    
-    func addPlaneDetection() {
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.horizontal, .vertical]
-        arView.session.delegate = self
-        arView.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-    }
-    
-    let planeMaterial = OcclusionMaterial()
-    var planeAnchors: [String: ARPlaneAnchor] = [:]
-    var entityMap: [String: AnchorEntity] = [:]
-
-    func updatePlaneAnchor(_ anchor: ARPlaneAnchor) {
-        let id = anchor.identifier.uuidString
-        
-        // If there's a pre-existing anchor entity with this same id, remove it from the scene as it will be replaced
-        if planeAnchors[id] != nil {
-            entityMap[id]?.removeFromParent()
-        }
-
-        // Create a plane mesh and add contact physics
-        let plane = ModelEntity(
-            mesh: .generatePlane(width: anchor.planeExtent.width, depth: anchor.planeExtent.height),
-            materials: [planeMaterial]
-        )
-        plane.name = id
-        let anchorEntity = AnchorEntity(world: anchor.transform)
-        anchorEntity.name = id
-        anchorEntity.addChild(plane)
-        plane.addPhysics(material: Materials.wood, mode: .static)
-        
-        // Add to the scene and entity map for future reference
-        arView.scene.addAnchor(anchorEntity)
-
-        // add to the planeAnchors and entity map for future reference
-        planeAnchors[id] = anchor
-        entityMap[id] = anchorEntity
-    }
-    
-    func removePlaneAnchor(_ anchor: ARPlaneAnchor) {
-        let id = anchor.identifier.uuidString
-        entityMap[id]?.removeFromParent()
-        entityMap.removeValue(forKey: id)
-        planeAnchors.removeValue(forKey: id)
-    }
-
-    
-    // MARK: - ARSessionDelegate Methods
-
-    func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
-        // Handle newly added anchors
-        for anchor in anchors {
-            if let planeAnchor = anchor as? ARPlaneAnchor {
-                updatePlaneAnchor(planeAnchor)
-            }
-        }
-    }
-
-    var lastAnchorUpdate: Date?
-
-    func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
-        // Handle updated anchors
-        let now = Date()
-        if let lastUpdate = lastAnchorUpdate, now.timeIntervalSince(lastUpdate) < 1.0 {
-            return // Throttle updates to once per second
-        }
-        self.lastAnchorUpdate = now
-        
-        for anchor in anchors {
-            if let planeAnchor = anchor as? ARPlaneAnchor {
-                updatePlaneAnchor(planeAnchor)
-            }
-        }
-    }
-
-    func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
-        for anchor in anchors {
-            // Remove the corresponding entity from the scene
-            if let planeAnchor = anchor as? ARPlaneAnchor { //},
-                removePlaneAnchor(planeAnchor)
-            }
-        }
-    }
-
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Handle session errors
-        print("AR Session failed with error: \(error)")
-    }
-
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Handle session interruption
-    }
-
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Handle end of session interruption
-    }
     
     // MARK: - Constants
     
