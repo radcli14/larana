@@ -13,11 +13,15 @@ struct AudioResources {
     var misses = [AudioFileResource]()
     
     init() {
-        if let resource = try? AudioFileResource.load(named: "target0.mp3") {
-            targets.append(resource)
+        for k in 0 ..< 7 {
+            if let resource = try? AudioFileResource.load(named: "target\(k).mp3") {
+                targets.append(resource)
+            }
         }
-        if let resource = try? AudioFileResource.load(named: "miss0.mp3") {
-            misses.append(resource)
+        for k in 0 ..< 5 {
+            if let resource = try? AudioFileResource.load(named: "miss\(k).mp3") {
+                misses.append(resource)
+            }
         }
     }
     
