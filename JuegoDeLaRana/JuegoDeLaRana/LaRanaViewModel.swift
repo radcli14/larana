@@ -192,6 +192,7 @@ class LaRanaViewModel: ObservableObject {
                     color: alert.color,
                     name: nameA
                 )
+                entities.generateAudio(for: nameA, of: thisHit)
                 print("\(nameA) collided with \(thisHit)")
             }
         }

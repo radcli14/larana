@@ -17,6 +17,7 @@ private func getNewAnchor(for width: Float) -> AnchorEntity {
 class ARViewEntities: NSObject, ARSessionDelegate {
     
     let arView = ARView(frame: .zero)
+    var audioResources: AudioResources?
 
     // Entities
     var anchor: AnchorEntity?
@@ -50,14 +51,13 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             self.buildFloor()
             self.loadModel()
             self.addPointLight()
+            self.audioResources = AudioResources()
             
             // Add the horizontal plane anchor to the scene
             if let anchor = self.anchor {
                 self.arView.scene.anchors.append(anchor)
             }
-            
-            //self.addPlaneDetection()
-            
+
             onComplete()
         }
     }
@@ -66,7 +66,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     func buildFloor() {
         // Generate the floor, which is created as a `ModelEntity` so that it satisfies `HasCollision` which is used for dragging the table
         let floorMesh = MeshResource.generatePlane(width: 0.001, depth: 0.001)
-        let occlusionMaterial = OcclusionMaterial()
         floor = ModelEntity(mesh: floorMesh, materials: [OcclusionMaterial()])
         if let floor, let anchor {
             floor.addPhysics(material: Materials.wood, mode: .static)
@@ -436,7 +435,17 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
             textEntity.removeFromParent()
         }
-   }
+    }
+    
+    func generateAudio(for entityName: String, of hit: CoinHit) {
+        guard let entity = anchor?.findEntity(named: entityName) else {
+            print("generateAudio failed to get \(entityName)")
+            return
+        }
+        if let targetAudio = audioResources?.getResource(for: hit) {
+            entity.playAudio(targetAudio)
+        }
+    }
     
     // TODO: Build particle effects when support comes with XCode 16
     

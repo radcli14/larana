@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A5326A42C938C9C00C7D053 /* AudioResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5326A32C938C9C00C7D053 /* AudioResources.swift */; };
+		8A5326A62C938E6B00C7D053 /* miss0.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8A5326A52C938E6A00C7D053 /* miss0.mp3 */; };
 		8AD85B4B2C7E550600537BB7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */; };
 		8AD85B4D2C7E550600537BB7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B4C2C7E550600537BB7 /* ContentView.swift */; };
 		8AD85B4F2C7E550800537BB7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B4E2C7E550800537BB7 /* Assets.xcassets */; };
@@ -25,6 +27,7 @@
 		8AD85B8C2C8214EF00537BB7 /* ARViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */; };
 		8AD85B8E2C82166900537BB7 /* ARViewEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */; };
 		8AD85B902C91BB7300537BB7 /* SIMD3+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */; };
+		8AD85B932C93472B00537BB7 /* target0.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8AD85B922C93472B00537BB7 /* target0.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +48,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8A5326A32C938C9C00C7D053 /* AudioResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioResources.swift; sourceTree = "<group>"; };
+		8A5326A52C938E6A00C7D053 /* miss0.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = miss0.mp3; sourceTree = "<group>"; };
 		8AD85B472C7E550600537BB7 /* JuegoDeLaRana.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JuegoDeLaRana.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8AD85B4C2C7E550600537BB7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -66,6 +71,7 @@
 		8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewContainer.swift; sourceTree = "<group>"; };
 		8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewEntities.swift; sourceTree = "<group>"; };
 		8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SIMD3+Extensions.swift"; sourceTree = "<group>"; };
+		8AD85B922C93472B00537BB7 /* target0.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = target0.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,12 +122,14 @@
 		8AD85B492C7E550600537BB7 /* JuegoDeLaRana */ = {
 			isa = PBXGroup;
 			children = (
+				8AD85B912C9346E500537BB7 /* Sounds */,
 				8AD85B782C7F2C7A00537BB7 /* Fonts */,
 				8AD85B742C7E7DF900537BB7 /* TableAndLaRana.usdz */,
 				8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */,
 				8AD85B4C2C7E550600537BB7 /* ContentView.swift */,
 				8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */,
 				8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */,
+				8A5326A32C938C9C00C7D053 /* AudioResources.swift */,
 				8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */,
 				8AD85B892C82147400537BB7 /* Entity+Extensions.swift */,
 				8AD85B762C7E817700537BB7 /* OverlayView.swift */,
@@ -166,6 +174,15 @@
 				8AD85B812C7F5B3E00537BB7 /* Sculptur.ttf */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		8AD85B912C9346E500537BB7 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				8A5326A52C938E6A00C7D053 /* miss0.mp3 */,
+				8AD85B922C93472B00537BB7 /* target0.mp3 */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -275,8 +292,10 @@
 				8AD85B7A2C7F337600537BB7 /* Etxeak.ttf in Resources */,
 				8AD85B822C7F5B3E00537BB7 /* Sculptur.ttf in Resources */,
 				8AD85B522C7E550800537BB7 /* Preview Assets.xcassets in Resources */,
+				8AD85B932C93472B00537BB7 /* target0.mp3 in Resources */,
 				8AD85B802C7F5AEA00537BB7 /* Moderna.ttf in Resources */,
 				8AD85B752C7E7DFA00537BB7 /* TableAndLaRana.usdz in Resources */,
+				8A5326A62C938E6B00C7D053 /* miss0.mp3 in Resources */,
 				8AD85B842C7F5B5000537BB7 /* Haritzag.ttf in Resources */,
 				8AD85B4F2C7E550800537BB7 /* Assets.xcassets in Resources */,
 			);
@@ -303,6 +322,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A5326A42C938C9C00C7D053 /* AudioResources.swift in Sources */,
 				8AD85B8A2C82147400537BB7 /* Entity+Extensions.swift in Sources */,
 				8AD85B772C7E817700537BB7 /* OverlayView.swift in Sources */,
 				8AD85B8E2C82166900537BB7 /* ARViewEntities.swift in Sources */,
