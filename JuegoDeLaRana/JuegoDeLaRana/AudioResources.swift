@@ -22,12 +22,16 @@ private func initResources(for prefix: String, quantity: Int) -> [AudioFileResou
 /// Stores sound effects for different types of `CoinHit`
 struct AudioResources {
     var tosses = [AudioFileResource]()
+    var shows = [AudioFileResource]()
+    var hides = [AudioFileResource]()
     var targets = [AudioFileResource]()
     var turfs = [AudioFileResource]()
     var misses = [AudioFileResource]()
     
     init() {
         tosses = initResources(for: "throw", quantity: 8)
+        shows = initResources(for: "showTable", quantity: 5)
+        hides = initResources(for: "hideTable", quantity: 5)
         targets = initResources(for: "target", quantity: 4)
         turfs = initResources(for: "turf", quantity: 2)
         misses = initResources(for: "miss", quantity: 3)

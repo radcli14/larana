@@ -76,7 +76,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Generate the occluder, which is a cube that obscures the table during times when you are setting a new anchor
         let occluderMesh = MeshResource.generateBox(width: Constants.anchorWidth, height: Constants.anchorWidth, depth: 2 * Constants.anchorWidth)
         occluder = ModelEntity(mesh: occluderMesh, materials: [OcclusionMaterial()])
-        occluder?.position.y = -Constants.anchorWidth
+        occluder?.position.y = -Constants.anchorWidth-0.02
         if let occluder, let floor {
             occluder.setParent(floor)
         }
@@ -181,6 +181,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             larana.position.y = -Constants.laranaHeight
             let transform = Transform(translation: SIMD3<Float>())
             larana.move(to: transform, relativeTo: floor, duration: 1.0)
+            generateShowTableAudio()
         }
     }
     
@@ -188,6 +189,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         if let floor, let larana {
             let transform = Transform(translation: SIMD3<Float>(0, -Constants.laranaHeight, 0))
             larana.move(to: transform, relativeTo: floor, duration: 1.0)
+            generateHideTableAudio()
             Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
                 larana.removeFromParent()
             }
@@ -451,6 +453,20 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             return
         }
         generateAudio(for: entity, with: targetAudio)
+    }
+    
+    func generateShowTableAudio() {
+        guard let targetAudio = audioResources?.shows.randomElement(), let floor else {
+            return
+        }
+        generateAudio(for: floor, with: targetAudio)
+    }
+    
+    func generateHideTableAudio() {
+        guard let targetAudio = audioResources?.hides.randomElement(), let floor else {
+            return
+        }
+        generateAudio(for: floor, with: targetAudio)
     }
     
     func generateThrowAudio(for entity: Entity) {
