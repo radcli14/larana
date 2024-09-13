@@ -22,4 +22,4 @@ Now I'm inspired to create an AR version of the game, just so I can sit in my li
 
 ## Attribution
 
-Audio files for sound effects have been downloaded from ![ZapSplat](https://www.zapsplat.com/).
+Audio files for sound effects have been downloaded from [ZapSplat](https://www.zapsplat.com/).
