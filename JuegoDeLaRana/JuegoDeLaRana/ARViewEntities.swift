@@ -276,6 +276,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             }
         }
         coins.append(generatedCoin)
+        generateThrowAudio(for: generatedCoin)
     }
     
     /// Checks whether the coin is expected to go into the frog's mouth based on its velocity direction relative to the center of the hole
@@ -442,8 +443,38 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             print("generateAudio failed to get \(entityName)")
             return
         }
-        if let targetAudio = audioResources?.getResource(for: hit) {
-            entity.playAudio(targetAudio)
+        generateAudio(for: entity, of: hit)
+    }
+    
+    func generateAudio(for entity: Entity, of hit: CoinHit) {
+        guard let targetAudio = audioResources?.getResource(for: hit) else {
+            return
+        }
+        generateAudio(for: entity, with: targetAudio)
+    }
+    
+    func generateThrowAudio(for entity: Entity) {
+        guard let targetAudio = audioResources?.tosses.randomElement() else {
+            return
+        }
+        generateAudio(for: entity, with: targetAudio)
+    }
+    
+    func generateAudio(for entity: Entity, with targetAudio: AudioFileResource) {
+        let audioEntity = Entity()
+        audioEntity.position = entity.position
+        if let floor {
+            audioEntity.setParent(floor)
+        }
+        
+        let audioController = audioEntity.prepareAudio(targetAudio)
+        if let motion = entity.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent {
+            audioController.gain = 10 * Double(log10(motion.linearVelocity.magnitudeSquared / 4.0))
+        }
+        audioController.play()
+        
+        Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+            audioEntity.removeFromParent()
         }
     }
     

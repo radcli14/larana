@@ -8,26 +8,37 @@
 import Foundation
 import RealityKit
 
+/// Initializes resources given a file naming convention of `"\(prefix)\(k).mp3"`
+private func initResources(for prefix: String, quantity: Int) -> [AudioFileResource] {
+    var result = [AudioFileResource]()
+    for k in 0 ..< quantity {
+        if let resource = try? AudioFileResource.load(named: "\(prefix)\(k).mp3") {
+            result.append(resource)
+        }
+    }
+    return result
+}
+
+/// Stores sound effects for different types of `CoinHit`
 struct AudioResources {
+    var tosses = [AudioFileResource]()
     var targets = [AudioFileResource]()
+    var turfs = [AudioFileResource]()
     var misses = [AudioFileResource]()
     
     init() {
-        for k in 0 ..< 7 {
-            if let resource = try? AudioFileResource.load(named: "target\(k).mp3") {
-                targets.append(resource)
-            }
-        }
-        for k in 0 ..< 5 {
-            if let resource = try? AudioFileResource.load(named: "miss\(k).mp3") {
-                misses.append(resource)
-            }
-        }
+        tosses = initResources(for: "throw", quantity: 8)
+        targets = initResources(for: "target", quantity: 4)
+        turfs = initResources(for: "turf", quantity: 2)
+        misses = initResources(for: "miss", quantity: 3)
     }
     
+    /// Provides sound effects for different types of `CoinHit`
     func getResource(for hit: CoinHit) -> AudioFileResource? {
         if hit == .hole || hit == .larana {
             return targets.randomElement()
+        } else if hit == .turf {
+            return turfs.randomElement()
         } else {
             return misses.randomElement()
         }

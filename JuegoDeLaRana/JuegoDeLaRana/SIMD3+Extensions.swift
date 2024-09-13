@@ -8,8 +8,12 @@
 import Foundation
 
 extension SIMD3<Float> {
+    var magnitudeSquared: Float {
+        x*x + y*y + z*z
+    }
+    
     var magnitude: Float {
-        sqrt(x*x + y*y + z*z)
+        sqrt(magnitudeSquared)
     }
     
     var normalized: SIMD3<Float> {

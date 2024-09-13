@@ -61,6 +61,7 @@ class LaRanaViewModel: ObservableObject {
     // MARK: - Scores
     
     @Published var nTossed = 0
+    var coinFirstHitTimes = [String: Date]()
     @Published var coinHits = [String: CoinHit]()
     var nHitLaRana: Int {
         coinHits.values.filter { $0 == .larana }.count
@@ -153,6 +154,7 @@ class LaRanaViewModel: ObservableObject {
             withAnimation {
                 nTossed += 1
             }
+            
             entities.tossCoin(with: coinVelocity, index: nTossed)
         }
     }
@@ -161,8 +163,16 @@ class LaRanaViewModel: ObservableObject {
     
     func handleCollisions(between nameA: String, and nameB: String) {
         if nameA.contains("coin") {
+            // Ignore collisions too long after the launch of the coin
+            if let launchTime = coinFirstHitTimes[nameA], Date.now.timeIntervalSince(launchTime) > 0.25 {
+                return
+            } else {
+                coinFirstHitTimes[nameA] = Date.now
+            }
+            
             // Set the enum based on what the coin collided with
             var thisHit: CoinHit = nameB == "target" ? .hole : nameB == "Mesh" ? .larana : nameB.contains("Turf") ? .turf : .ground
+            entities.generateAudio(for: nameA, of: thisHit)
             
             if let coinScore = coinHits[nameA], thisHit.rawValue <= coinScore.rawValue {
                 // The existing hit score exceeded this one, don't update
@@ -188,11 +198,10 @@ class LaRanaViewModel: ObservableObject {
                 // Provide the alert text and color that will float above the target
                 let alert = CoinHitAlert(for: thisHit)
                 entities.generateFloatingText(
-                    text: alert.announcement + (changedScore ? "***" : ""),
+                    text: alert.announcement,
                     color: alert.color,
                     name: nameA
                 )
-                entities.generateAudio(for: nameA, of: thisHit)
                 print("\(nameA) collided with \(thisHit)")
             }
         }
