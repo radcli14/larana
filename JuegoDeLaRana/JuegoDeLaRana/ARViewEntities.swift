@@ -399,7 +399,9 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         // Set material to be the specified color depending on event type
         let material = SimpleMaterial(
-            color: color == "white" ? .white : color == "green" ? .green : .red, roughness: 0, isMetallic: false
+            color: color == "white" ? .white : color == "green" ? .green : color == "blue" ? .blue : .red,
+            roughness: 0,
+            isMetallic: false
         )
         
         // The frame is set to be fairly large to contain the whole text

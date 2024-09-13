@@ -20,8 +20,8 @@ struct CoinHitAlert {
     var color: String = ""
     
     init(for hit: CoinHit) {
-        announcement = hit == .hole ? success : hit == .larana ? close : miss
-        color = hit == .hole ? "green" : hit == .larana ? "white" : "red"
+        announcement = hit == .hole ? success : hit == .larana ? close : hit == .turf ? turf : miss
+        color = hit == .hole ? "green" : hit == .larana ? "blue" : hit == .turf ? "white" : "red"
     }
     
     var success: String {
@@ -29,7 +29,11 @@ struct CoinHitAlert {
     }
     
     var close: String {
-        ["¡cerca!", "¡casi!", "¡bien!", "¡mejor!", "¡buen intento!"].randomElement() ?? "¡cerca!"
+        ["¡cerca!", "¡casi!", "¡bien!", "¡mejor!", "¡buen intento!", "¡vale!"].randomElement() ?? "¡cerca!"
+    }
+    
+    var turf: String {
+        ["sigue intentándolo", "en la mesa", "en el césped", "al lado"].randomElement() ?? "sigue intentándolo"
     }
     
     var miss: String {
@@ -179,14 +183,12 @@ class LaRanaViewModel: ObservableObject {
             } else {
                 // Contacted target, check whether it is "going in" to the target.
                 // If yes, then set up so that it falls in, otherwise toggle to a .larana hit
-                var changedScore = false
                 if thisHit == .hole {
                     if entities.isOnTarget(coin: nameA) {
                         // Add filter so it falls through the table
                         entities.addFilterAfterHitTarget(to: nameA)
                     } else {
                         thisHit = .larana
-                        changedScore = true
                     }
                 }
                 
