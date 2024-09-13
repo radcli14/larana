@@ -408,14 +408,16 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let containerFrame = CGRect(x: -1, y: -1, width: 2.0, height: 1)
 
         // Generate the mesh and use it to create the entity
+        let font: UIFont = UIFont(name: "Moderna", size: 0.015) ?? .systemFont(ofSize: 0.015)
         let textMesh = MeshResource
             .generateText(text,
                           extrusionDepth: 0.005,
-                          font: .systemFont(ofSize: 0.015),
+                          font: font,
                           containerFrame: containerFrame,
                           alignment: .center,
                           lineBreakMode: .byWordWrapping
         )
+
         let textEntity = ModelEntity(mesh: textMesh, materials: [material])
 
         // Initial position of the floating text is just above the target
