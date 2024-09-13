@@ -19,3 +19,7 @@ Now I'm inspired to create an AR version of the game, just so I can sit in my li
 ![Blender render with shader materials](Images/TableWithLaRana_2048x2048.png)
 
 ## RealityKit and SwiftUI
+
+## Attribution
+
+Audio files for sound effects have been downloaded from ![ZapSplat](https://www.zapsplat.com/).
