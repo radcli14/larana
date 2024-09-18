@@ -1,5 +1,7 @@
 # Juego de la Rana
 <!-- 3D Augmented Reality version of the Basque Juego de la Rana -->
+[Join the beta test on iOS](https://testflight.apple.com/join/3b6ujPfg)
+
 🐸 The Basque "Juego de la Rana" ("Igel Jokoa" in Euskera, or simply "Frog Game") is a popular tavern game where one must attempt to throw a metal disc into the mouth of a brass frog statue. 
 Similar games exist elsewhere, replacing the word _rana_ (frog) with _sapo_ (toad) in South America, or the similarly-named "Toad in the Hole" in England.
 
