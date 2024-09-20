@@ -6,6 +6,34 @@
 //
 
 import SwiftUI
+import TipKit
+
+/// Enum for the view button types, containing info for how to label and describe the button, and when its active
+enum OverlayViewButtonType {
+    case resetAnchor
+    case moveTable
+    
+    var text: String {
+        switch self {
+        case .resetAnchor: "Position the Table"
+        case .moveTable:  "Move the Table"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .resetAnchor: "arrow.counterclockwise"
+        case .moveTable: "arrow.up.and.down.and.arrow.left.and.right"
+        }
+    }
+    
+    var activeForState: GameState {
+        switch self {
+        case .resetAnchor: .resetting
+        case .moveTable: .move
+        }
+    }
+}
 
 /// Overlay of the user controls and scoring displayed on the bottom of the screen
 /// - Parameters:
@@ -23,11 +51,6 @@ struct OverlayView: View {
     let onTapReset: () -> Void
     let onTapMove: () -> Void
 
-    // State variables for the animation for changes in state
-    @State private var stateDisplayPadding: CGFloat = Constants.stateDisplayDefaultPadding
-    @State private var stateDisplayFontStyle: Font = .caption
-    @State private var stateDisplayTextColor: Color = .primary
-    
     var body: some View {
         VStack {
             Spacer()
@@ -36,7 +59,8 @@ struct OverlayView: View {
                     .scaleEffect(Constants.progressViewScale)
             }
             Spacer()
-            stateDisplay
+            //stateDisplay
+            
             HStack(alignment: .center, spacing: Constants.buttonSpacing) {
                 resetAnchorButton
                 scoreBoard
@@ -50,45 +74,11 @@ struct OverlayView: View {
         }
     }
     
-    // MARK: - State
+    // MARK: - Tips
     
-    private var stateDisplay: some View {
-        Text(state.rawValue)
-            .multilineTextAlignment(.center)
-            .padding(stateDisplayPadding)
-            .font(stateDisplayFontStyle)
-            .foregroundColor(stateDisplayTextColor)
-            .onChange(of: state) {
-                animateStateChange()
-            }
-    }
-    
-    private func animateStateChange() {
-        // Before animation, reset modifiers to defaults
-        stateDisplayPadding = Constants.stateDisplayDefaultPadding
-        stateDisplayFontStyle = .caption
-        stateDisplayTextColor = .primary
-        
-        // After a delay, grow to emphasize the state description text
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Constants.durationForFade) {
-            withAnimation(.easeInOut(duration: Constants.durationForFade)) {
-                // Increase size and change color
-                stateDisplayPadding = Constants.stateDisplayAnimatePadding
-                stateDisplayFontStyle = .headline
-                stateDisplayTextColor = .accentColor
-            }
-        }
-
-        // Return to original size and color after a delay
-        let deadline = DispatchTime.now() + 2*Constants.durationForFade + Constants.durationForLargeText
-        DispatchQueue.main.asyncAfter(deadline: deadline) {
-            withAnimation(.easeInOut(duration: Constants.durationForFade)) {
-                stateDisplayPadding = Constants.stateDisplayDefaultPadding
-                stateDisplayFontStyle = .caption
-                stateDisplayTextColor = .primary
-            }
-        }
-    }
+    private let tipForReset = TipForResetButton()
+    private let tipForPlay = TipForCoinFlick()
+    private let tipForMove = TipForMoveButton()
     
     // MARK: - Scoreboard
     
@@ -104,6 +94,9 @@ struct OverlayView: View {
             }
             .font(.caption)
         }
+        .popoverTip(tipForReset)
+        .popoverTip(tipForPlay)
+        .popoverTip(tipForMove)
     }
     
     /// A stack of the scoring category and its integer value
@@ -122,19 +115,17 @@ struct OverlayView: View {
     /// A button that responds to itself being active by becoming prominent, defaults to bordered
     @ViewBuilder
     private func OverlayButton(
-        text: String,
-        systemName: String? = nil,
-        activeForState: GameState,
+        for buttonType: OverlayViewButtonType,
         action: @escaping () -> Void
     ) -> some View {
-        if state == activeForState {
+        if state == buttonType.activeForState {
             Button(action: { action() }) {
-                OverlayButtonContent(text: text, systemName: systemName)
+                OverlayButtonContent(for: buttonType)
             }
             .buttonStyle(.borderedProminent)
         } else {
             Button(action: { action() }) {
-                OverlayButtonContent(text: text, systemName: systemName)
+                OverlayButtonContent(for: buttonType)
             }
             .buttonStyle(.bordered)
         }
@@ -143,26 +134,25 @@ struct OverlayView: View {
     /// Content of the button that can be either an icon or a string.
     /// If its an icon, the string displays in its context menu.
     @ViewBuilder
-    private func OverlayButtonContent(text: String, systemName: String?) -> some View {
-        if let systemName {
-            Image(systemName: systemName)
-                .contextMenu {
-                    Text("Tap to \(text)")
-                }
-        } else {
-            Text(text)
-                .frame(width: Constants.textContentWidth)
-        }
+    private func OverlayButtonContent(for buttonType: OverlayViewButtonType) -> some View {
+        Image(systemName: buttonType.icon)
+            .contextMenu {
+                Text("Tap to \(buttonType.text)")
+            }
     }
     
     /// The button that will make the table reset to the nearest/best anchor position
     private var resetAnchorButton: some View {
-        OverlayButton(text: "Reset Anchor", systemName: "arrow.counterclockwise", activeForState: .resetting, action: { onTapReset() })
+        OverlayButton(for: .resetAnchor) {
+            onTapReset()
+        }
     }
     
     /// The button that will allow the user to drag the table to a new position
     private var moveTableButton: some View {
-        OverlayButton(text: "Move Table", systemName: "arrow.up.and.down.and.arrow.left.and.right", activeForState: .move, action: { onTapMove() })
+        OverlayButton(for: .moveTable) {
+            onTapMove()
+        }
     }
     
     // MARK: - Constants
