@@ -220,7 +220,7 @@ def Xform "Root"
     {
         quatf xformOp:orient = (0.9914449, 0, 0.13052619, 0)
         float3 xformOp:scale = (0.2, 0.2, 0.2)
-        float3 xformOp:translate = (0, 0.62, 0)
+        float3 xformOp:translate = (0, 0.62, 0.024675488)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
     }
 
@@ -462,6 +462,9 @@ def Xform "Root"
 
         def Material "Transparent"
         {
+            token cullMode = "unspecified" (
+                allowedTokens = ["unspecified", "none", "front", "back"]
+            )
             token outputs:mtlx:surface
             token outputs:realitykit:vertex
             prepend token outputs:surface.connect = </Root/Materials/Transparent/UsdPreviewSurface.outputs:surface>
@@ -476,7 +479,7 @@ def Xform "Root"
                 float inputs:ior = 1
                 float inputs:occlusion = 0
                 float inputs:opacity = 0
-                float inputs:roughness = 0
+                float inputs:roughness = 1
                 token outputs:surface
             }
         }
@@ -533,9 +536,9 @@ def Xform "Root"
         rel material:binding = </Root/Materials/Transparent> (
             bindMaterialAs = "weakerThanDescendants"
         )
-        double radius = 0.01
-        float3 xformOp:scale = (2, 1, 1)
-        float3 xformOp:translate = (0, 0.71435773, 0.041453905)
+        double radius = 0.03
+        float3 xformOp:scale = (1, 1, 1)
+        float3 xformOp:translate = (0, 0.71435773, 0.064242065)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
         def Material "DefaultMaterial"
