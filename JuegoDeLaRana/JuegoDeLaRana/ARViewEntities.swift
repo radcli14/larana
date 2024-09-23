@@ -27,6 +27,8 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     var coin: Entity?
     var coins = [Entity]()
     
+    var fireworkEmitter: Entity?
+    
     var target: Entity? {
         anchor?.findEntity(named: "target")
     }
@@ -59,13 +61,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             self.buildFloor()
             self.loadModel()
             self.addPointLight()
+            self.buildFireworks()
             self.audioResources = AudioResources()
             
             // Add the horizontal plane anchor to the scene
             if let anchor = self.anchor {
                 self.arView.scene.anchors.append(anchor)
             }
-
+            
             onComplete()
         }
     }
@@ -150,6 +153,19 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         ))
         lightEntity.position = SIMD3<Float>(0, 0.8, 0.3)
         lightEntity.setParent(floor ?? anchor)
+    }
+    
+    /// Build firework entity for succesful hits of the target
+    func buildFireworks() {
+        fireworkEmitter = Entity()
+        fireworkEmitter?.position = SIMD3<Float>(0, 0.7, 0.1)
+        fireworkEmitter?.setParent(floor ?? anchor)
+        
+        if #available(iOS 18.0, *) {
+            var emitterComponent = ParticleEmitterComponent.Presets.fireworks
+            emitterComponent.isEmitting = false
+            fireworkEmitter?.components.set(emitterComponent)
+        }
     }
     
     // MARK: - Anchor
@@ -350,6 +366,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             entity.components[CollisionComponent.self] = collision
             print("Collision filter \(collision.filter) added to \(entity.name)")
         }
+        
+        if #available(iOS 18.0, *) {
+            self.showFireworks()
+        }
     }
     
     /// Reduce the coin velocity to make it more likely to drop into the chute after hitting the target
@@ -422,13 +442,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let textEntity = ModelEntity(mesh: textMesh, materials: [material])
 
         // Initial position of the floating text is just above the target
-        textEntity.position = SIMD3<Float>(0, 0.15, 0)
+        textEntity.position = Constants.initialTextPosition
         textEntity.setParent(target)
         
         // The text is animated to make it grow, move upward, and towards the player
+        let randomTranslation = SIMD3<Float>(.random(in: Constants.randomTextRange), .random(in: Constants.randomTextRange), .random(in: Constants.randomTextRange))
         let animationTransform = Transform(
-            scale: SIMD3<Float>(repeating: 6.28),
-            translation: SIMD3<Float>(x: 0, y: 0.3, z: 0.2)
+            scale: SIMD3<Float>(repeating: Constants.textScale),
+            translation: Constants.constantTextTranslation + randomTranslation
         )
         textEntity.move(to: animationTransform, relativeTo: target, duration: 1.0)
         
@@ -499,7 +520,35 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
     }
     
-    // TODO: Build particle effects when support comes with XCode 16
+    /// Turn on the emission of fireworks after hitting the target, and turn off after some period of time
+    @available(iOS 18.0, *)
+    func showFireworks() {
+        // Turn the emitter on, and generate a burst
+        fireworkEmitter?.components[ParticleEmitterComponent.self]?.isEmitting = true
+        fireworkEmitter?.components[ParticleEmitterComponent.self]?.burst()
+        
+        // Play firework audio
+        var counter = 0
+        if let target, let targetAudio = audioResources?.fireworks.randomElement() {
+            generateAudio(for: target, with: targetAudio)
+        }
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            if let target = self.target, let targetAudio = self.audioResources?.fireworks.randomElement() {
+                self.generateAudio(for: target, with: targetAudio)
+            }
+            self.fireworkEmitter?.components[ParticleEmitterComponent.self]?.burst()
+            
+            counter += 1
+            if counter >= 2 {
+                timer.invalidate() // Stop the timer after 3 repetitions
+            }
+        }
+        
+        // Stop the fireworks after a delay
+        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+            self.fireworkEmitter?.components[ParticleEmitterComponent.self]?.isEmitting = false
+        }
+    }
     
     // MARK: - Constants
     
@@ -509,6 +558,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         static let laranaHeight: Float = 0.9
         static let coinName = "coin"
         static let angularRateRange = Float(-50)...Float(50)
+        static let initialTextPosition = SIMD3<Float>(0, 0.15, 0)
+        static let textScale: Float = 6.28
+        static let constantTextTranslation = SIMD3<Float>(x: 0, y: 0.3, z: 0.2)
+        static let randomTextRange = Float(-0.1)...Float(0.1)
         static let maxNumberOfCoins = 20
     }
 }

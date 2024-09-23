@@ -25,6 +25,7 @@ struct AudioResources {
     var shows = [AudioFileResource]()
     var hides = [AudioFileResource]()
     var targets = [AudioFileResource]()
+    var fireworks = [AudioFileResource]()
     var turfs = [AudioFileResource]()
     var misses = [AudioFileResource]()
     
@@ -33,6 +34,7 @@ struct AudioResources {
         shows = initResources(for: "showTable", quantity: 5)
         hides = initResources(for: "hideTable", quantity: 5)
         targets = initResources(for: "target", quantity: 4)
+        fireworks = initResources(for: "firework", quantity: 3)
         turfs = initResources(for: "turf", quantity: 2)
         misses = initResources(for: "miss", quantity: 3)
     }

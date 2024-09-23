@@ -46,7 +46,7 @@ struct ContentView : View {
         .task {
             // Configure and load your tips at app launch.
             do {
-                try Tips.resetDatastore()
+                try Tips.resetDatastore() // For debugging to make sure the tips always are displayed
                 try Tips.configure([
                     .displayFrequency(.immediate),
                     .datastoreLocation(.applicationDefault),
