@@ -53,6 +53,9 @@
 		8AD85B8C2C8214EF00537BB7 /* ARViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */; };
 		8AD85B8E2C82166900537BB7 /* ARViewEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */; };
 		8AD85B902C91BB7300537BB7 /* SIMD3+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */; };
+		8AF323A62C9B4813008D90A0 /* LaRanaTips.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF323A52C9B4812008D90A0 /* LaRanaTips.swift */; };
+		8AF323A82C9B48A0008D90A0 /* CoinHit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF323A72C9B48A0008D90A0 /* CoinHit.swift */; };
+		8AF323AA2C9DE36F008D90A0 /* Splash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF323A92C9DE36F008D90A0 /* Splash.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +125,9 @@
 		8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewContainer.swift; sourceTree = "<group>"; };
 		8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewEntities.swift; sourceTree = "<group>"; };
 		8AD85B8F2C91BB7300537BB7 /* SIMD3+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SIMD3+Extensions.swift"; sourceTree = "<group>"; };
+		8AF323A52C9B4812008D90A0 /* LaRanaTips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaRanaTips.swift; sourceTree = "<group>"; };
+		8AF323A72C9B48A0008D90A0 /* CoinHit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinHit.swift; sourceTree = "<group>"; };
+		8AF323A92C9DE36F008D90A0 /* Splash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Splash.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,11 +178,13 @@
 		8AD85B492C7E550600537BB7 /* JuegoDeLaRana */ = {
 			isa = PBXGroup;
 			children = (
+				8AF323A52C9B4812008D90A0 /* LaRanaTips.swift */,
 				8AD85B912C9346E500537BB7 /* Sounds */,
 				8AD85B782C7F2C7A00537BB7 /* Fonts */,
 				8AD85B742C7E7DF900537BB7 /* TableAndLaRana.usdz */,
 				8AD85B4A2C7E550600537BB7 /* AppDelegate.swift */,
 				8AD85B4C2C7E550600537BB7 /* ContentView.swift */,
+				8AF323A92C9DE36F008D90A0 /* Splash.swift */,
 				8AD85B8B2C8214EF00537BB7 /* ARViewContainer.swift */,
 				8AD85B8D2C82166900537BB7 /* ARViewEntities.swift */,
 				8A5326A32C938C9C00C7D053 /* AudioResources.swift */,
@@ -184,6 +192,7 @@
 				8AD85B892C82147400537BB7 /* Entity+Extensions.swift */,
 				8AD85B762C7E817700537BB7 /* OverlayView.swift */,
 				8AD85B872C8209C200537BB7 /* LaRanaViewModel.swift */,
+				8AF323A72C9B48A0008D90A0 /* CoinHit.swift */,
 				8AD85B4E2C7E550800537BB7 /* Assets.xcassets */,
 				8AD85B502C7E550800537BB7 /* Preview Content */,
 			);
@@ -324,7 +333,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					8AD85B462C7E550600537BB7 = {
 						CreatedOnToolsVersion = 15.4;
@@ -428,8 +437,11 @@
 				8AD85B8E2C82166900537BB7 /* ARViewEntities.swift in Sources */,
 				8AD85B4D2C7E550600537BB7 /* ContentView.swift in Sources */,
 				8AD85B902C91BB7300537BB7 /* SIMD3+Extensions.swift in Sources */,
+				8AF323A82C9B48A0008D90A0 /* CoinHit.swift in Sources */,
+				8AF323A62C9B4813008D90A0 /* LaRanaTips.swift in Sources */,
 				8AD85B4B2C7E550600537BB7 /* AppDelegate.swift in Sources */,
 				8AD85B882C8209C200537BB7 /* LaRanaViewModel.swift in Sources */,
+				8AF323AA2C9DE36F008D90A0 /* Splash.swift in Sources */,
 				8AD85B8C2C8214EF00537BB7 /* ARViewContainer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -598,6 +610,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JuegoDeLaRana/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "La Rana";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -609,7 +623,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcengineer.JuegoDeLaRana;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -630,6 +644,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = JuegoDeLaRana/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "La Rana";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -641,7 +657,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcengineer.JuegoDeLaRana;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -653,7 +669,6 @@
 		8AD85B6F2C7E550900537BB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -673,7 +688,6 @@
 		8AD85B702C7E550900537BB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -693,7 +707,6 @@
 		8AD85B722C7E550900537BB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 59VPT4KMHW;
@@ -711,7 +724,6 @@
 		8AD85B732C7E550900537BB7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 59VPT4KMHW;

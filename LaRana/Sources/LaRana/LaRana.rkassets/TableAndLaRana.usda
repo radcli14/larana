@@ -492,7 +492,7 @@ def Xform "Root"
     {
         quatf xformOp:orient = (1, 0, 0, 0)
         float3 xformOp:scale = (1, 1, 1)
-        float3 xformOp:translate = (0.1, 0.63, 0.1)
+        float3 xformOp:translate = (0.009789318, 0.71233326, 0.06)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
 
         over "Materials"
@@ -536,23 +536,10 @@ def Xform "Root"
         rel material:binding = </Root/Materials/Transparent> (
             bindMaterialAs = "weakerThanDescendants"
         )
-        double radius = 0.03
+        double radius = 0.1
         float3 xformOp:scale = (1, 1, 1)
         float3 xformOp:translate = (0, 0.71435773, 0.064242065)
         uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
-
-        def Material "DefaultMaterial"
-        {
-            prepend token outputs:surface.connect = </Root/target/DefaultMaterial/DefaultSurfaceShader.outputs:surface>
-
-            def Shader "DefaultSurfaceShader"
-            {
-                uniform token info:id = "UsdPreviewSurface"
-                color3f inputs:diffuseColor = (1, 1, 1)
-                float inputs:roughness = 0.75
-                token outputs:surface
-            }
-        }
     }
 }
 

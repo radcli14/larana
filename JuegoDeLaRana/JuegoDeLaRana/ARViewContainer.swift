@@ -55,7 +55,7 @@ struct ARViewContainer: UIViewRepresentable {
         
         func setupCollisionHandling() {
             viewModel.entities.arView.scene.subscribe(to: CollisionEvents.Began.self) { event in
-                self.viewModel.handleCollisions(between: event.entityA.name, and: event.entityB.name)
+                self.viewModel.handleCollisions(for: event)
             }.store(in: &cancellables)
         }
     }

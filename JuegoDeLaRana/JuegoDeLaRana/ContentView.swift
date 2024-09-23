@@ -7,6 +7,7 @@
 
 import SwiftUI
 import RealityKit
+import TipKit
 
 struct ContentView : View {
     @ObservedObject var viewModel: LaRanaViewModel = LaRanaViewModel()
@@ -20,22 +21,40 @@ struct ContentView : View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .edgesIgnoringSafeArea(.all)
             .overlay {
-                OverlayView(
-                    state: viewModel.state,
-                    nThrows: viewModel.nTossed,
-                    nHitsLaRana: viewModel.nHitLaRana,
-                    nHitsTarget: viewModel.nHitTarget,
-                    onTapReset: {
-                        withAnimation {
-                            viewModel.resetAnchor()
+                if viewModel.state == .new || viewModel.state == .loading {
+                    Splash()
+                } else {
+                    OverlayView(
+                        state: viewModel.state,
+                        nThrows: viewModel.nTossed,
+                        nHitsLaRana: viewModel.nHitLaRana,
+                        nHitsTarget: viewModel.nHitTarget,
+                        onTapReset: {
+                            withAnimation {
+                                viewModel.resetAnchor()
+                            }
+                        },
+                        onTapMove: {
+                            withAnimation {
+                                viewModel.toggleMove()
+                            }
                         }
-                    },
-                    onTapMove: {
-                        withAnimation {
-                            viewModel.toggleMove()
-                        }
-                    }
-                )
+                    )
+                }
+            }
+        }
+        .task {
+            // Configure and load your tips at app launch.
+            do {
+                try Tips.resetDatastore()
+                try Tips.configure([
+                    .displayFrequency(.immediate),
+                    .datastoreLocation(.applicationDefault),
+                ])
+            }
+            catch {
+                // Handle TipKit errors
+                print("Error initializing TipKit \(error.localizedDescription)")
             }
         }
     }

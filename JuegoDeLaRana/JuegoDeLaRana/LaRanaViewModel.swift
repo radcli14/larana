@@ -7,57 +7,27 @@
 
 import Foundation
 import SwiftUI
-
-enum CoinHit: Int {
-    case ground = 0
-    case turf = 1
-    case larana = 2
-    case hole = 3
-}
-
-struct CoinHitAlert {
-    var announcement: String = ""
-    var color: String = ""
-    
-    init(for hit: CoinHit) {
-        announcement = hit == .hole ? success : hit == .larana ? close : hit == .turf ? turf : miss
-        color = hit == .hole ? "green" : hit == .larana ? "blue" : hit == .turf ? "white" : "red"
-    }
-    
-    var success: String {
-        ["¡ÉXITO!", "¡EN EL HOYO!", "¡GOOOOOOL!", "¡ENHORABUENA!", "¡MUY BIEN!", "¡BUENO!", "¡BUENISIMO!"].randomElement() ?? "¡EXITO!"
-    }
-    
-    var close: String {
-        ["¡cerca!", "¡casi!", "¡bien!", "¡mejor!", "¡buen intento!", "¡vale!"].randomElement() ?? "¡cerca!"
-    }
-    
-    var turf: String {
-        ["sigue intentándolo", "en la mesa", "en el césped", "al lado"].randomElement() ?? "sigue intentándolo"
-    }
-    
-    var miss: String {
-        ["fallaste", "fuera", "lejos", "malo", "peor", "no soporto"].randomElement() ?? "fallaste"
-    }
-}
+import TipKit
+import RealityKit
 
 enum GameState: String {
     case new = "New"
     case loading = "3D model is loading ..."
-    case play = "To play: flick to toss a coin"
-    case resetting = "Tap to place the table"
-    case move = "To move: drag with one finger, or rotate with two fingers"
+    case play = "Flick upward to toss a coin, try to get it in the frog's mouth"
+    case resetting = "Tap on the ground to place the table"
+    case move = "Drag the table with one finger to move, or with two fingers to rotate"
 }
 
 class LaRanaViewModel: ObservableObject {
     @Published var entities = ARViewEntities()
     @Published var state: GameState = .new
-
+    
     init() {
         state = .loading
         entities.build {
             withAnimation {
                 self.state = .resetting
+                TipForResetButton.hasToggledToResetMode = true
             }
         }
     }
@@ -87,10 +57,11 @@ class LaRanaViewModel: ObservableObject {
                 // Put the app into a state where the user will tap to update the anchor
                 entities.hideTable()
                 state = .resetting
-                
+
             } else if state == .resetting {
                 // Reset the anchor to an automatically determined position
                 if entities.resetAnchorLocation() { // Checks that the new anchor succeeded
+                    TipForCoinFlick.hasToggledToPlayMode = true
                     state = .play
                 }
             }
@@ -114,6 +85,7 @@ class LaRanaViewModel: ObservableObject {
         // Add or remove gestures from the table
         if entities.floor != nil {
             if state == .move {
+                TipForMoveButton.hasToggledToMoveMode = true
                 entities.addMoveGesture()
                 print("Added gestures to the floor")
             } else {
@@ -132,6 +104,7 @@ class LaRanaViewModel: ObservableObject {
         if state == .resetting {
             if entities.resetAnchorLocation(to: location) { // Checks that the new anchor succeeded
                 withAnimation {
+                    TipForCoinFlick.hasToggledToPlayMode = true
                     state = .play
                 }
             }
@@ -165,48 +138,86 @@ class LaRanaViewModel: ObservableObject {
     
     // MARK: - Collisions
     
-    func handleCollisions(between nameA: String, and nameB: String) {
-        if nameA.contains("coin") {
-            // Ignore collisions too long after the launch of the coin
-            if let launchTime = coinFirstHitTimes[nameA], Date.now.timeIntervalSince(launchTime) > 0.25 {
-                return
-            } else {
-                coinFirstHitTimes[nameA] = Date.now
-            }
-            
-            // Set the enum based on what the coin collided with
-            var thisHit: CoinHit = nameB == "target" ? .hole : nameB == "Mesh" ? .larana : nameB.contains("Turf") ? .turf : .ground
-            entities.generateAudio(for: nameA, of: thisHit)
-            
-            if let coinScore = coinHits[nameA], thisHit.rawValue <= coinScore.rawValue {
-                // The existing hit score exceeded this one, don't update
-            } else {
-                // Contacted target, check whether it is "going in" to the target.
-                // If yes, then set up so that it falls in, otherwise toggle to a .larana hit
-                if thisHit == .hole {
-                    if entities.isOnTarget(coin: nameA) {
-                        // Add filter so it falls through the table
-                        entities.addFilterAfterHitTarget(to: nameA)
-                    } else {
-                        thisHit = .larana
-                    }
-                }
-                
-                // This is either a first hit or a better score than previous hit, update the score
-                withAnimation {
-                    coinHits[nameA] = thisHit
-                }
-                
-                // Provide the alert text and color that will float above the target
-                let alert = CoinHitAlert(for: thisHit)
-                entities.generateFloatingText(
-                    text: alert.announcement,
-                    color: alert.color,
-                    name: nameA
-                )
-                print("\(nameA) collided with \(thisHit)")
-            }
+    
+    func handleCollisions(for event: CollisionEvents.Began) {
+        guard let coin = event.entityA.asCoin else {
+            return
         }
+        
+        // Ignore collisions too long after the launch of the coin
+        if let launchTime = coinFirstHitTimes[coin.name] {
+            if Date.now.timeIntervalSince(launchTime) > 0.5 {
+                return
+            }
+        } else {
+            coinFirstHitTimes[coin.name] = Date.now
+        }
+        
+        //let nameB = event.entityB.name
+        
+        var thisHit: CoinHit =
+            event.entityB.name == "target" ? .hole :
+            event.entityB.name == "Mesh" ? .larana :
+            event.entityB.name.contains("Turf") ? .turf : .ground
+        
+        // Handle likelihood that the coin was on target in this event.
+        // If its on target, then set up so that it falls through, otherwise toggle to a .larana hit
+        let prob = thisHit == .hole ? calculateOnTargetProbability(coin: coin) : 0.0
+        if prob > 0.5 {
+            thisHit = .hole
+            entities.addFilterAfterHitTarget(to: coin.name)
+        } else {
+            thisHit = thisHit == .hole ? .larana : thisHit
+        }
+
+        if let coinScore = coinHits[coin.name], thisHit.rawValue <= coinScore.rawValue {
+            // The existing hit score exceeded this one, don't update
+        } else {
+            // This is either a first hit or a better score than previous hit, update the score
+            withAnimation {
+                coinHits[coin.name] = thisHit
+            }
+            
+            // Provide the alert audio, text and color that will float above the target
+            entities.generateAudio(for: coin.name, of: thisHit)
+            let alert = CoinHitAlert(for: thisHit)
+            entities.generateFloatingText(
+                text: alert.announcement,
+                color: alert.color,
+                name: coin.name
+            )
+            print("\(coin.name) collided with \(thisHit)")
+        }
+    }
+    
+    /// Checks whether the coin is expected to go into the frog's mouth based on its velocity direction relative to the center of the hole
+    func calculateOnTargetProbability(coin: Entity) -> Float {
+        guard let target = entities.target, let floor = entities.floor else {
+            return 0.0
+        }
+        
+        if let motion = coin.components[PhysicsMotionComponent.self] {
+            let floorTransform = floor.transformMatrix(relativeTo: nil)
+            let relPosInTargetFrame = coin.position(relativeTo: target).rotatedTo(floorTransform)
+            let velInTargetFrame = motion.linearVelocity.rotatedTo(floorTransform)
+            
+            // Project forward in time to where the coin will be located when it crosses the target plane
+            let timeUntilHit = -relPosInTargetFrame.z / velInTargetFrame.z
+            var relPosWhenCoinHitsTarget = relPosInTargetFrame + velInTargetFrame * timeUntilHit
+            relPosWhenCoinHitsTarget.y -= 0.5 * 9.8 * pow(timeUntilHit, 2) // adjust for gravity
+            
+            // Calculate probability score using logistic regression equation
+            // intercept = 2.007849951750073, coefficients = [ 0.973165   -0.27587833 -0.01048093 -0.29251362]
+            let x = 100 * relPosWhenCoinHitsTarget.x
+            let y = 100 * relPosWhenCoinHitsTarget.y
+            let x2 = pow(x, 2)
+            let y2 = pow(y, 2)
+            let gama = 2.007849951750073 + 0.973165*x - 0.27587833*x2 - 0.01048093*y - 0.29251362*y2
+            let prob = 1 / (1 + exp(-gama))
+            print("\(coin.name) collision event data = [\(x), \(y), \(velInTargetFrame.csv)] prob = \(prob)")
+            return prob
+        }
+        return 0.0
     }
     
     // MARK: - Constants
@@ -214,5 +225,11 @@ class LaRanaViewModel: ObservableObject {
     private struct Constants {
         static let flickThreshold: CGFloat = -1000
         static let pixelToMeterPerSec: Float = 0.001
+    }
+}
+
+extension Entity {
+    var asCoin: Entity? {
+        name.contains("coin") ? self : nil
     }
 }

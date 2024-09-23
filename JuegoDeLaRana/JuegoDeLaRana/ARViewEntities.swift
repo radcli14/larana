@@ -27,6 +27,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     var coin: Entity?
     var coins = [Entity]()
     
+    var target: Entity? {
+        anchor?.findEntity(named: "target")
+    }
+    
+    var hole: Entity? {
+        anchor?.findEntity(named: "TableHole_Cylinder")
+    }
+    
     // Collisions
     let tableGroup = CollisionGroup(rawValue: 1 << 0)
     let coinGroup = CollisionGroup(rawValue: 1 << 1)
@@ -36,7 +44,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         super.init()
 
         // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
-        //arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
+        arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
         arView.environment.sceneUnderstanding.options.insert(.occlusion)
         arView.environment.sceneUnderstanding.options.insert(.physics)
         // Optional: set debug options
@@ -108,9 +116,12 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     func buildContactSurfaces(in larana: Entity) {
+        // Give the target a collision component, but no physics
+        addPhysics(to: ["target"], in: larana, material: nil, mode: nil)
+        
         // Add contact to the turf sections
-        let turfEntities = ["TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019",
-                            "target"] // Include the target, want a dull bounce (if any) when the coin hits it
+        let turfEntities = [
+            "TableMainTurf_Cube_017", "TableBackTurf_Cube_016", "TableWallLeftTurf_Cube_018", "TableWallRightTurf_Cube_019"]
         addPhysics(to: turfEntities, in: larana, material: Materials.turf, mode: .kinematic, collisionGroup: tableGroup)
         
         // Add contact to La Rana
@@ -118,12 +129,15 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         addPhysics(to: metalEntities, in: larana, material: Materials.metal, mode: .kinematic, collisionGroup: tableGroup)
 
         // Add contact to the wood frame
-        let woodEntities: [String] = [
+        let woodEntities = [
             "ChuteFront_Cube_011", "ChuteSlope_Cube_012", "ChuteRight_Cube_013", "ChuteLeft_Cube_014",
             "LegFrontRight_Cube", "LegFrontLeft_Cube_001", "LegRearRight_Cube_002", "LegRearLeft_Cube_003",
             "SupportLowerFront_Cube_008", "SupportLowerRear_Cube_009", "SupportLowerCenter_Cube_010"
         ]
         addPhysics(to: woodEntities, in: larana, material: Materials.wood, mode: .kinematic)
+        
+        let tableEntities = ["TableBack_Cube_005", "TableWallRight_Cube_006", "TableWallLeft_Cube_007", "TableMain_Cube_015"]
+        addPhysics(to: tableEntities, in: larana, material: Materials.wood, mode: .kinematic, collisionGroup: tableGroup)
     }
     
     func addPointLight() {
@@ -161,7 +175,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         if let floor {
             floor.removeFromParent()
-            floor.position = SIMD3<Float>() //(0.0, -0.01, 0.0)
+            floor.position = SIMD3<Float>()
             newAnchor.addChild(floor)
         }
         if let anchor {
@@ -252,13 +266,26 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Set the position of the fresh coin to slightly below the device prior to toss
         generatedCoin.position = cameraTransformFromAnchor.translation
         generatedCoin.position.y -= 0.1
-
-        // The flick velocity will set the velocity relative to the camera, but we need to rotate it into world frame
-        let velocityInWorldFrame = cameraTransform.matrix * SIMD4<Float>(velocity.x, velocity.y, velocity.z, 0.0)
         
+        // Get a speed adjustment for distance
+        var velocity = velocity
+        if let target = anchor.findEntity(named: "target") {
+            let cameraTransformFromTarget = getCameraTransformRelativeTo(entity: target)
+            let distanceToTarget = cameraTransformFromTarget.translation.magnitude
+            
+            // ubar is the speed we would need to reach the target in horizontal and vertical coordinate
+            // if they were both equal, in other words, v = ubar * i + ubar * j
+            let ubar = sqrt(0.5 * 9.8 * distanceToTarget)
+
+            // This weight is the amount we should trust the "flick" velocity
+            let weight = Float(0.15)
+            velocity.y = weight * velocity.y + (1 - weight) * ubar
+            velocity.z = weight * velocity.z - (1 - weight) * ubar
+        }
+
         // Set a new PhysicsMotionComponent to add initial velocity, and randomize angular velocity
         generatedCoin.components.set(PhysicsMotionComponent(
-            linearVelocity: SIMD3<Float>(velocityInWorldFrame.x, velocityInWorldFrame.y, velocityInWorldFrame.z),
+            linearVelocity: velocity.rotatedFrom(cameraTransform.matrix),
             angularVelocity: randomAngularRateVector
         ))
         
@@ -281,32 +308,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         generateThrowAudio(for: generatedCoin)
     }
     
-    /// Checks whether the coin is expected to go into the frog's mouth based on its velocity direction relative to the center of the hole
-    func isOnTarget(coin name: String) -> Bool {
-        if let coin = anchor?.findEntity(named: name),
-           let motion = coin.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent,
-           let target = anchor?.findEntity(named: "target"),
-            let hole = anchor?.findEntity(named: "TableHole_Cylinder") {
-            let relativePositionToTarget = target.position - coin.position
-            let relativePositionToHole = hole.position - coin.position
-            let lateralDistance = sqrt(pow(relativePositionToTarget.x, 2) + pow(relativePositionToTarget.y, 2))
-            let dot1 = relativePositionToTarget.normalized.dot(motion.linearVelocity.normalized)
-            let dot2 = relativePositionToHole.normalized.dot(motion.linearVelocity.normalized)
-            
-            // These equations are determined in the ipynb in the Analysis folder,
-            // use a logarithmic regression to predict probability that the coin
-            // would go through the frog's mouth and hit the target.
-            //intercept = -0.8044900150549832, coefficients = [-0.26646102  1.57960177 -0.08407506] // 30 points
-            //intercept = -0.9201886638897043, coefficients = [-0.15180935  1.90207864 -0.13622121] // 40 points
-            //intercept = -0.7288543149756059, coefficients = [-0.19913931  2.19779176 -0.16881278] // 50 points
-            let gama = -0.73 - 0.2*dot1 + 2.2*dot2 - 0.17*lateralDistance
-            let prob = 1 / (1 + exp(-gama))
-            print("\(coin.name) relativePosition = \(relativePositionToTarget), velocity = \(motion.linearVelocity), dot1 = \(dot1), dot2 = \(dot2), lateralDistance = \(lateralDistance), prob = \(prob)")
-            return prob > 0.5 // (dot1 > 0.0 || dot2 > 0.0) && motion.linearVelocity.z < 0
-        }
-        return true
-    }
-    
     func addFilterAfterHitTarget(to name: String) {
         if let anchor, let coin = anchor.findEntity(named: name) {
             addCollisionFilter(to: coin, group: coinGroup, mask: .all.subtracting(tableGroup))
@@ -327,8 +328,8 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     func addPhysics(
         to listOfEntityNames: [String],
         in mainEntity: Entity,
-        material: PhysicsMaterialResource,
-        mode: PhysicsBodyMode,
+        material: PhysicsMaterialResource? = nil,
+        mode: PhysicsBodyMode? = nil,
         collisionGroup: CollisionGroup? = nil,
         collisionMask: CollisionGroup? = nil
     ) {
@@ -344,7 +345,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     /// Sets the collision group and the mask of an entity, used to disable collisions of the coin with the table to emulate dropping through the target hole
     func addCollisionFilter(to entity: Entity, group: CollisionGroup = .all, mask: CollisionGroup = .all) {
-        if var collision = entity.components[CollisionComponent.self] as? CollisionComponent {
+        if var collision = entity.components[CollisionComponent.self] {
             collision.filter = CollisionFilter(group: group, mask: mask)
             entity.components[CollisionComponent.self] = collision
             print("Collision filter \(collision.filter) added to \(entity.name)")
@@ -356,7 +357,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         DispatchQueue.main.async {
             // Need to remove child before setting the motion component then add after to make it take effect
             anchor.removeChild(coin)
-            if let motion = coin.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent {
+            if let motion = coin.components[PhysicsMotionComponent.self] {
                 // To slow down the coin motion, we multiply by 0.25
                 var newVelocity = 0.2 * motion.linearVelocity
                 
@@ -380,9 +381,9 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     private struct Materials {
-        static let metal = PhysicsMaterialResource.generate(friction: 0.3, restitution: 0.9)
+        static let metal = PhysicsMaterialResource.generate(friction: 0.8, restitution: 0.7)
         static let turf = PhysicsMaterialResource.generate(friction: 0.8, restitution: 0.2)
-        static let wood = PhysicsMaterialResource.generate(friction: 0.5, restitution: 0.7)
+        static let wood = PhysicsMaterialResource.generate(friction: 0.8, restitution: 0.5)
     }
     
     // MARK: - Effects
@@ -488,7 +489,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
         
         let audioController = audioEntity.prepareAudio(targetAudio)
-        if let motion = entity.components[PhysicsMotionComponent.self] as? PhysicsMotionComponent {
+        if let motion = entity.components[PhysicsMotionComponent.self] {
             audioController.gain = 10 * Double(log10(motion.linearVelocity.magnitudeSquared / 4.0))
         }
         audioController.play()

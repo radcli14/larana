@@ -11,20 +11,20 @@ import RealityKit
 extension Entity {
     var modelComponent: ModelComponent? {
         if let modelComponent = components[ModelComponent.self] {
-            return modelComponent as? ModelComponent
+            return modelComponent
         } else {
             if let childWithModel = children.first(
                 where: { $0.components[ModelComponent.self] != nil }
             ) {
                 if let modelComponent = childWithModel.components[ModelComponent.self]{
-                    return modelComponent as? ModelComponent
+                    return modelComponent
                 }
             }
         }
         return nil
     }
     
-    func addPhysics(material: PhysicsMaterialResource, mode: PhysicsBodyMode) {
+    func addPhysics(material: PhysicsMaterialResource?, mode: PhysicsBodyMode?) {
         guard let modelComponent else {
             print("No child with a ModelComponent found in \(self.name)")
             return
@@ -35,12 +35,14 @@ extension Entity {
         components.set(collisionComponent)
 
         // Create and add a PhysicsBodyComponent
-        let physicsBody = PhysicsBodyComponent(
-            massProperties: .default,
-            material: material,
-            mode: mode
-        )
-        components.set(physicsBody)
+        if let mode {
+            let physicsBody = PhysicsBodyComponent(
+                massProperties: .default,
+                material: material,
+                mode: mode
+            )
+            components.set(physicsBody)
+        }
         
         //print("Physics and collision components added to \(self.name)")
     }

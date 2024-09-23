@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 extension SIMD3<Float> {
     var magnitudeSquared: Float {
@@ -22,5 +23,19 @@ extension SIMD3<Float> {
     
     func dot(_ other: SIMD3<Float>) -> Float {
         x*other.x + y*other.y + z*other.z
+    }
+    
+    func rotatedFrom(_ transformMatrix: float4x4) -> SIMD3<Float> {
+        let inWorldFrame = transformMatrix * SIMD4<Float>(x, y, z, 0.0)
+        return SIMD3<Float>(inWorldFrame.x, inWorldFrame.y, inWorldFrame.z)
+    }
+    
+    func rotatedTo(_ transformMatrix: float4x4) -> SIMD3<Float> {
+        let inLocalFrame = transformMatrix.inverse * SIMD4<Float>(x, y, z, 0.0)
+        return SIMD3<Float>(inLocalFrame.x, inLocalFrame.y, inLocalFrame.z)
+    }
+    
+    var csv: String {
+        "\(x), \(y), \(z)"
     }
 }

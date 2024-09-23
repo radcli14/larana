@@ -4,9 +4,18 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "table",
         "Materials",
-        "Material_Turf"
+        "MaplePlywood"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials"
       ],
       {
         "isExpanded" : true,
@@ -16,6 +25,16 @@
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
         "Materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Geom"
       ],
       {
         "isExpanded" : true,
@@ -43,39 +62,27 @@
       },
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
+        "Root",
+        "table",
+        "Materials",
+        "Material_Turf"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
         "Coin"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
-        "Root",
-        "table",
-        "Geom"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
-        "Root",
-        "table",
-        "Geom",
-        "ChuteLeft_Cube_014"
-      ],
-      {
-        "isExpanded" : false,
-        "isLocked" : true
-      },
-      [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
-        "Root",
-        "Materials",
-        "MaplePlywood"
       ],
       {
         "isExpanded" : true,
@@ -95,25 +102,18 @@
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "table"
+        "table",
+        "Geom",
+        "ChuteLeft_Cube_014"
       ],
       {
-        "isExpanded" : true,
-        "isLocked" : false
+        "isExpanded" : false,
+        "isLocked" : true
       },
       [
         "1608E04E-B18D-4D1C-9377-F059198F61D8",
         "Root",
-        "table",
-        "Materials"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
-      [
-        "1608E04E-B18D-4D1C-9377-F059198F61D8",
-        "Root"
+        "table"
       ],
       {
         "isExpanded" : true,
@@ -123,15 +123,6 @@
   },
   "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC" : {
     "objectMetadataList" : [
-      [
-        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
-        "Root",
-        "table"
-      ],
-      {
-        "isExpanded" : true,
-        "isLocked" : false
-      },
       [
         "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
@@ -153,6 +144,15 @@
         "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
         "Root",
         "Materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "CBE4F12F-F57D-4CDC-B34D-C877FAB4EFDC",
+        "Root",
+        "table"
       ],
       {
         "isExpanded" : true,
