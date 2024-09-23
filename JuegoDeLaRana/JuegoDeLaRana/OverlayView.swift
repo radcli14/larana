@@ -59,8 +59,6 @@ struct OverlayView: View {
                     .scaleEffect(Constants.progressViewScale)
             }
             Spacer()
-            //stateDisplay
-            
             HStack(alignment: .center, spacing: Constants.buttonSpacing) {
                 resetAnchorButton
                 scoreBoard

@@ -178,7 +178,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         var newAnchor: AnchorEntity?
         if let location, let ray = arView.raycast(from: location, allowing: .estimatedPlane, alignment: .horizontal).first {
             // Set the location of the anchor based upon a raycast to a point that the user tapped on screen
-            newAnchor = AnchorEntity(raycastResult: ray)
+            newAnchor = AnchorEntity(world: ray.worldTransform)
             print("Set new anchor at \(newAnchor!.position)")
         } else {
             // Set the location of the anchor based upon the default
