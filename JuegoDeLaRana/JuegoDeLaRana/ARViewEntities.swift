@@ -442,15 +442,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let textEntity = ModelEntity(mesh: textMesh, materials: [material])
 
         // Initial position of the floating text is just above the target
-        textEntity.position = Constants.initialTextPosition
+        textEntity.position = Constants.initialTextPosition + 0.5 * .random(in: Constants.randomTextRange)
         textEntity.setParent(target)
         
         // The text is animated to make it grow, move upward, and towards the player
-        let randomTranslation = SIMD3<Float>(.random(in: Constants.randomTextRange), .random(in: Constants.randomTextRange), .random(in: Constants.randomTextRange))
-        let animationTransform = Transform(
-            scale: SIMD3<Float>(repeating: Constants.textScale),
-            translation: Constants.constantTextTranslation + randomTranslation
-        )
+        let randomRotation = 2 * SIMD3<Float>.random(in: Constants.randomTextRange)
+        var animationTransform = Transform(pitch: randomRotation.x, yaw: randomRotation.y, roll: randomRotation.z)
+        animationTransform.scale = SIMD3<Float>(repeating: Constants.textScale)
+        animationTransform.translation = Constants.constantTextTranslation + .random(in: Constants.randomTextRange)
         textEntity.move(to: animationTransform, relativeTo: target, duration: 1.0)
         
         // If this coin was the same as for the last floating text, remove that one and replace it with this
@@ -462,6 +461,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         // Schedule the text to disappear after a second
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
+            let scaleOutTransform = Transform(scale: SIMD3<Float>(repeating: 0))
+            textEntity.move(to: scaleOutTransform, relativeTo: target, duration: 0.25)
+        }
+        Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { _ in
             textEntity.removeFromParent()
         }
     }

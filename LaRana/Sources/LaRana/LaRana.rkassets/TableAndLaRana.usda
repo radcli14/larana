@@ -479,6 +479,7 @@ def Xform "Root"
                 float inputs:ior = 1
                 float inputs:occlusion = 0
                 float inputs:opacity = 0
+                float inputs:opacityThreshold = 1
                 float inputs:roughness = 1
                 token outputs:surface
             }

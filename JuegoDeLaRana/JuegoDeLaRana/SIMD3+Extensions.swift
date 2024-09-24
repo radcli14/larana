@@ -38,4 +38,8 @@ extension SIMD3<Float> {
     var csv: String {
         "\(x), \(y), \(z)"
     }
+    
+    static func random(in range: ClosedRange<Float>) -> SIMD3<Float> {
+        SIMD3<Float>(Float.random(in: range), Float.random(in: range), Float.random(in: range))
+    }
 }
