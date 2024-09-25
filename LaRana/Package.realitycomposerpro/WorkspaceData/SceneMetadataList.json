@@ -1,4 +1,35 @@
 {
+  "89A0F349-08D2-441D-8E46-690D7D19B2AD" : {
+    "objectMetadataList" : [
+      [
+        "89A0F349-08D2-441D-8E46-690D7D19B2AD",
+        "Root",
+        "triangulo",
+        "Geom"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "89A0F349-08D2-441D-8E46-690D7D19B2AD",
+        "Root"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "89A0F349-08D2-441D-8E46-690D7D19B2AD",
+        "Root",
+        "triangulo"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      }
+    ]
+  },
   "1608E04E-B18D-4D1C-9377-F059198F61D8" : {
     "objectMetadataList" : [
       [

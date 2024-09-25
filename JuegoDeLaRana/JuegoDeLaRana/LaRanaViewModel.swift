@@ -22,12 +22,35 @@ class LaRanaViewModel: ObservableObject {
     @Published var entities = ARViewEntities()
     @Published var state: GameState = .new
     
+    var cameraMode: ARView.CameraMode {
+        get {
+            entities.arView.cameraMode
+        }
+        set {
+            // TODO: create the camera mode setter
+        }
+    }//= .nonAR
+    
     init() {
         state = .loading
         entities.build {
+            // When the entities have completed their build, toggle to either the resetting (AR) or play (nonAR) state depending on camera mode
             withAnimation {
-                self.state = .resetting
-                TipForResetButton.hasToggledToResetMode = true
+                switch self.cameraMode {
+                case .ar: self.state = .resetting
+                case .nonAR: self.state = .play
+                @unknown default:
+                    fatalError("Received an unknown ARView.CameraMode after building the entities")
+                }
+            }
+            
+            // I don't want the tip to show instantly, this delays it, and only shows if the current state matches the tip
+            Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
+                switch self.state {
+                case .resetting: TipForResetButton.hasToggledToResetMode = true
+                case .play: TipForCoinFlick.hasToggledToPlayMode = true
+                default: print("After delay, state was different from .resetting or .play")
+                }
             }
         }
     }
@@ -46,7 +69,17 @@ class LaRanaViewModel: ObservableObject {
 
     // MARK: - Button Intents
     
+    /// Handle the user tapping on the reset button in the overlay view by either putting the game in `.resetting` mode where they can choose a
+    /// new table position, or getting an automatically generated anchor and placing the table before toggling to `.play` mode.
     func resetAnchor() {
+        // Only respond to taps on the reset button when in AR mode
+        if cameraMode == .nonAR {
+            if state == .resetting || state == .move {
+                state = .play
+            }
+            return
+        }
+        
         withAnimation {
             // Make sure flick gestures are removed if currently in move state, will switch to resetting state
             if state == .move {
@@ -61,13 +94,18 @@ class LaRanaViewModel: ObservableObject {
             } else if state == .resetting {
                 // Reset the anchor to an automatically determined position
                 if entities.resetAnchorLocation() { // Checks that the new anchor succeeded
-                    TipForCoinFlick.hasToggledToPlayMode = true
+                    Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
+                        if self.state == .play {
+                            TipForCoinFlick.hasToggledToPlayMode = true
+                        }
+                    }
                     state = .play
                 }
             }
         }
     }
 
+    /// Handles the user tapping on the move button in the overlay view by toggling ether in or out of the mode where you can move a table with drag gesture
     func toggleMove() {
         print("Tapped toggleMove with state = \(state)")
         // Update the state based on the user tap
@@ -85,7 +123,11 @@ class LaRanaViewModel: ObservableObject {
         // Add or remove gestures from the table
         if entities.floor != nil {
             if state == .move {
-                TipForMoveButton.hasToggledToMoveMode = true
+                Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
+                    if self.state == .move {
+                        TipForMoveButton.hasToggledToMoveMode = true
+                    }
+                }
                 entities.addMoveGesture()
                 print("Added gestures to the floor")
             } else {
@@ -104,7 +146,11 @@ class LaRanaViewModel: ObservableObject {
         if state == .resetting {
             if entities.resetAnchorLocation(to: location) { // Checks that the new anchor succeeded
                 withAnimation {
-                    TipForCoinFlick.hasToggledToPlayMode = true
+                    Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
+                        if self.state == .play {
+                            TipForCoinFlick.hasToggledToPlayMode = true
+                        }
+                    }
                     state = .play
                 }
             }
@@ -138,7 +184,7 @@ class LaRanaViewModel: ObservableObject {
     
     // MARK: - Collisions
     
-    
+    ///. Checks what type of entity the coin collided with, then triggers game score updates, text displays, collision filtering, or
     func handleCollisions(for event: CollisionEvents.Began) {
         guard let coin = event.entityA.asCoin else {
             return
@@ -153,8 +199,7 @@ class LaRanaViewModel: ObservableObject {
             coinFirstHitTimes[coin.name] = Date.now
         }
         
-        //let nameB = event.entityB.name
-        
+        // Characterize the type of hit (initial determination)
         var thisHit: CoinHit =
             event.entityB.name == "target" ? .hole :
             event.entityB.name == "Mesh" ? .larana :
@@ -225,6 +270,7 @@ class LaRanaViewModel: ObservableObject {
     private struct Constants {
         static let flickThreshold: CGFloat = -1000
         static let pixelToMeterPerSec: Float = 0.001
+        static let delayBeforeTip: Double = 3
     }
 }
 

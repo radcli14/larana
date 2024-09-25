@@ -15,7 +15,6 @@ struct ARViewContainer: UIViewRepresentable {
     @ObservedObject var viewModel: LaRanaViewModel
     
     func makeUIView(context: Context) -> ARView {
-        
         // Add the tap gesture recognizer used for setting the table position
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture(_:)))
         viewModel.entities.arView.addGestureRecognizer(tapGesture)
@@ -24,8 +23,8 @@ struct ARViewContainer: UIViewRepresentable {
         let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
         viewModel.entities.arView.addGestureRecognizer(panGesture)
                 
+        // The arView is nullable and has to be built by the view model, if that hasn't completed yet. return a blank ARView that doesn't require AR
         return viewModel.entities.arView
-        
     }
     
     // Coordinator class to manage cancellables

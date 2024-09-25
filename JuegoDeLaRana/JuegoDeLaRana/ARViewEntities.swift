@@ -16,10 +16,13 @@ private func getNewAnchor(for width: Float) -> AnchorEntity {
 
 class ARViewEntities: NSObject, ARSessionDelegate {
     
-    let arView = ARView(frame: .zero)
+    //var arView = ARView(frame: .zero)
+    var arView = ARView(frame: .zero, cameraMode: .nonAR, automaticallyConfigureSession: true)
+    
     var audioResources: AudioResources?
 
     // Entities
+    var triangulo: Entity?
     var anchor: AnchorEntity?
     var floor: ModelEntity?
     var occluder: ModelEntity?
@@ -41,22 +44,17 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     let tableGroup = CollisionGroup(rawValue: 1 << 0)
     let coinGroup = CollisionGroup(rawValue: 1 << 1)
     let generalGroup = CollisionGroup(rawValue: 1 << 2)
-
+    
     override init() {
         super.init()
-
-        // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
-        arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
-        arView.environment.sceneUnderstanding.options.insert(.occlusion)
-        arView.environment.sceneUnderstanding.options.insert(.physics)
-        // Optional: set debug options
-        //arView.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
+        buildArView()
     }
     
     // MARK: - Setup
     
     func build(onComplete: @escaping () -> Void) {
         DispatchQueue.main.async {
+            //self.buildArView()
             self.anchor = getNewAnchor(for: Constants.anchorWidth)
             self.buildFloor()
             self.loadModel()
@@ -71,6 +69,17 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             
             onComplete()
         }
+    }
+    
+    func buildArView() {
+        //arView = ARView(frame: .zero)//, cameraMode: cameraMode, automaticallyConfigureSession: false)
+        
+        // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
+        arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
+        arView.environment.sceneUnderstanding.options.insert(.occlusion)
+        arView.environment.sceneUnderstanding.options.insert(.physics)
+        // Optional: set debug options
+        //arView?.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
     }
     
     /// Create a floor that sits with the anchor to visualize its location
@@ -98,12 +107,31 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         if let larana = try? Entity.load(named: "TableAndLaRana.usdz") {
             self.buildModel(for: larana)
         }
+        
+        // TESTING: non AR mode
+        if let triangulo = try? Entity.load(named: "Triangulo.usdz") {
+            buildContactSurfaces(inTriangulo: triangulo)
+            self.triangulo = triangulo
+            
+            let nonArAnchor = AnchorEntity(world: SIMD3<Float>())
+            setAnchor(to: nonArAnchor)
+            triangulo.setParent(nonArAnchor)
+            
+            let cameraEntity = PerspectiveCamera()
+            cameraEntity.camera.fieldOfViewInDegrees = 60
+            var cameraTransform = Transform(pitch: -0.4)
+            cameraTransform.translation = SIMD3<Float>(0, 1.75, 3)
+            let cameraAnchor = AnchorEntity(world: cameraTransform.matrix)
+            cameraAnchor.addChild(cameraEntity)
+            arView.scene.addAnchor(cameraAnchor)
+            print("did make camera")
+        }
     }
     
     func buildModel(for larana: Entity) {
         // Add physics to the coin and table contact surfaces
         buildCoin(in: larana)
-        buildContactSurfaces(in: larana)
+        buildContactSurfaces(inLarana: larana)
 
         // Update the reference to larana in this model so it gets published
         self.larana = larana
@@ -118,7 +146,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
     }
     
-    func buildContactSurfaces(in larana: Entity) {
+    func buildContactSurfaces(inLarana larana: Entity) {
         // Give the target a collision component, but no physics
         addPhysics(to: ["target"], in: larana, material: nil, mode: nil)
         
@@ -141,6 +169,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         let tableEntities = ["TableBack_Cube_005", "TableWallRight_Cube_006", "TableWallLeft_Cube_007", "TableMain_Cube_015"]
         addPhysics(to: tableEntities, in: larana, material: Materials.wood, mode: .kinematic, collisionGroup: tableGroup)
+    }
+    
+    func buildContactSurfaces(inTriangulo triangulo: Entity) {
+        let trianguloEntities = ["Ormaetxe_Plane", "Ground_Cube"]
+        addPhysics(to: trianguloEntities, in: triangulo, material: Materials.wood, mode: .static, collisionGroup: tableGroup)
     }
     
     func addPointLight() {
@@ -189,6 +222,12 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             return false
         }
         
+        setAnchor(to: newAnchor)
+        
+        return true
+    }
+    
+    private func setAnchor(to newAnchor: AnchorEntity) {
         if let floor {
             floor.removeFromParent()
             floor.position = SIMD3<Float>()
@@ -201,8 +240,6 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         anchor = newAnchor
         
         makeTableVisible()
-        
-        return true
     }
     
     func makeTableVisible() {
