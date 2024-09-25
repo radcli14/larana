@@ -258,7 +258,7 @@ def Xform "Root"
                 def Shader "TexCoordReader"
                 {
                     uniform token info:id = "UsdPrimvarReader_float2"
-                    token inputs:varname.connect = </Root/Materials/Wood/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    token inputs:varname.connect = </Root/Materials/Wood.inputs:frame:stPrimvarName>
                     float2 outputs:result
                 }
             }
@@ -273,7 +273,7 @@ def Xform "Root"
                 def Shader "TexCoordReader"
                 {
                     uniform token info:id = "UsdPrimvarReader_float2"
-                    token inputs:varname.connect = </Root/Materials/Wood/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    token inputs:varname.connect = </Root/Materials/Wood.inputs:frame:stPrimvarName>
                     float2 outputs:result
                 }
             }
@@ -288,7 +288,7 @@ def Xform "Root"
                 def Shader "TexCoordReader"
                 {
                     uniform token info:id = "UsdPrimvarReader_float2"
-                    token inputs:varname.connect = </Root/Materials/Wood/UsdPreviewSurface.inputs:frame:stPrimvarName>
+                    token inputs:varname.connect = </Root/Materials/Wood.inputs:frame:stPrimvarName>
                     float2 outputs:result
                 }
             }

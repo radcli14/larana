@@ -31,6 +31,7 @@ struct ContentView : View {
                     .pickerStyle(.segmented)
                     .frame(width: Constants.pickerWidth)
                     .onChange(of: cameraMode) {
+                        // Setting the cameraMode in the viewModel will make it try to activate the new mode in the entities
                         viewModel.cameraMode = cameraMode
                         
                         // Make sure the state change worked, if not, reset to what the viewModel gets from the entities

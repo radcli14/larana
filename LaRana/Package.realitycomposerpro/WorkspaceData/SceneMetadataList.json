@@ -3,6 +3,14 @@
     "objectMetadataList" : [
       [
         "89A0F349-08D2-441D-8E46-690D7D19B2AD",
+        "Materials"
+      ],
+      {
+        "isExpanded" : true,
+        "isLocked" : false
+      },
+      [
+        "89A0F349-08D2-441D-8E46-690D7D19B2AD",
         "Root",
         "triangulo",
         "Geom"

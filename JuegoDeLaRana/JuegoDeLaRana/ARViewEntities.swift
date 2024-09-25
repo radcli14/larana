@@ -8,6 +8,7 @@
 import Foundation
 import ARKit
 import RealityKit
+import CoreMotion
 
 /// Provide a horizontal plane anchor for the content
 private func getNewAnchor(for width: Float) -> AnchorEntity {
@@ -16,9 +17,11 @@ private func getNewAnchor(for width: Float) -> AnchorEntity {
 
 class ARViewEntities: NSObject, ARSessionDelegate {
     
-    var arView: ARView // = ARView(frame: .zero, cameraMode: .nonAR, automaticallyConfigureSession: true)
+    var arView: ARView
     
     var audioResources: AudioResources?
+    
+    let motionManager = CMMotionManager()
 
     // Entities
     var triangulo: Entity?
@@ -48,20 +51,29 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     init(cameraMode: ARView.CameraMode = .nonAR) {
         arView = ARView(frame: .zero, cameraMode: cameraMode, automaticallyConfigureSession: true)
         super.init()
-        buildArView()
+
+        // Optional: set debug options
+        //arView?.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
     }
     
     // MARK: - AR View Modes
     
-    func buildArView() {
-        //arView = ARView(frame: .zero)//, cameraMode: cameraMode, automaticallyConfigureSession: false)
-        
-        // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
-        arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
-        arView.environment.sceneUnderstanding.options.insert(.occlusion)
-        arView.environment.sceneUnderstanding.options.insert(.physics)
-        // Optional: set debug options
-        //arView?.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
+    private let sceneUnderstandingOptions: [ARView.Environment.SceneUnderstanding.Options] = [
+        .receivesLighting, .occlusion, .physics
+    ]
+    
+    /// Adds Scene Understanding to the `arView`, so that the coins bounce off the ground, tables occlude the model, etc
+    func addSceneUnderstanding() {
+        for option in sceneUnderstandingOptions {
+            arView.environment.sceneUnderstanding.options.insert(option)
+        }
+    }
+    
+    /// Removes Scene Understanding from the `arView`
+    func removeSceneUnderstanding() {
+        for option in sceneUnderstandingOptions {
+            arView.environment.sceneUnderstanding.options.remove(option)
+        }
     }
     
     /// Toggle between VR (no camera) and AR (with camera) mode
@@ -81,6 +93,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             return
         }
         
+        removeSceneUnderstanding()
         arView.scene.anchors.removeAll()
         
         let nonArAnchor = AnchorEntity(world: SIMD3<Float>())
@@ -93,20 +106,24 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         cameraTransform.translation = SIMD3<Float>(0, 1.75, 3)
         vrCameraAnchor = AnchorEntity(world: cameraTransform.matrix)
         vrCameraAnchor?.addChild(cameraEntity)
+        startTrackingDeviceMotion()
         arView.scene.addAnchor(vrCameraAnchor!)
         
         let vrFadeOutTime = 2.0
         let startTime = Date.now
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            let t = Date.now.timeIntervalSince(startTime)
             if #available(iOS 18.0, *) {
                 if let opacity = self.triangulo?.components[OpacityComponent.self]?.opacity {
-                    self.triangulo?.components[OpacityComponent.self]?.opacity += 0.1 * (1 - opacity)
+                    self.triangulo?.components[OpacityComponent.self]?.opacity = Float(1 - 0.5 * cos(.pi*t/vrFadeOutTime))
                 }
             }
-            if Date.now.timeIntervalSince(startTime) >= vrFadeOutTime {
+            if t >= vrFadeOutTime {
                 timer.invalidate()
+                if #available(iOS 18.0, *) {
+                    self.triangulo?.components[OpacityComponent.self]?.opacity = 1
+                }
                 self.arView.cameraMode = .nonAR
-                print("added triangulo")
             }
         }
     }
@@ -115,13 +132,15 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     func deactivateVrScene() {
         hideTable()
         self.arView.cameraMode = .ar
+        addSceneUnderstanding()
         let vrFadeOutTime = 2.0
         let startTime = Date.now
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            let t = Date.now.timeIntervalSince(startTime)
             if #available(iOS 18.0, *) {
-                self.triangulo?.components[OpacityComponent.self]?.opacity *= 0.9
+                self.triangulo?.components[OpacityComponent.self]?.opacity = Float(0.5 + 0.5 * cos(.pi*t/vrFadeOutTime))
             }
-            if Date.now.timeIntervalSince(startTime) >= vrFadeOutTime {
+            if t >= vrFadeOutTime {
                 self.triangulo?.removeFromParent()
                 self.vrCameraAnchor?.removeFromParent()
                 timer.invalidate()
@@ -130,12 +149,37 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         }
     }
     
+    func startTrackingDeviceMotion() {
+        if motionManager.isDeviceMotionAvailable {
+            motionManager.deviceMotionUpdateInterval = 1.0 / 60.0 // 60 Hz refresh rate
+            motionManager.startDeviceMotionUpdates(to: .main) { (motion, error) in
+                if let motion = motion {
+                    self.updateCameraTransform(with: motion)
+                }
+            }
+        }
+    }
+
+    func updateCameraTransform(with motion: CMDeviceMotion) {
+        let attitude = motion.attitude
+        let coreMotionQuaternion = simd_quatf(ix: Float(attitude.quaternion.x),
+                                              iy: Float(attitude.quaternion.y),
+                                              iz: Float(attitude.quaternion.z),
+                                              r: Float(attitude.quaternion.w))
+        
+        // Correction quaternion to adjust for the coordinate system difference between CoreMotion and RealityKit
+        let correctionQuaternion = simd_quatf(angle: -.pi / 2, axis: SIMD3<Float>(1, 0, 0))
+
+        // Apply the correction to the quaternion
+        let adjustedQuaternion = correctionQuaternion * coreMotionQuaternion
+
+        vrCameraAnchor?.children.first?.transform.rotation = adjustedQuaternion
+    }
     
     // MARK: - Setup
     
     func build(onComplete: @escaping () -> Void) {
         DispatchQueue.main.async {
-            //self.buildArView()
             self.anchor = getNewAnchor(for: Constants.anchorWidth)
             self.buildFloor()
             self.loadModel()
@@ -188,15 +232,20 @@ class ARViewEntities: NSObject, ARSessionDelegate {
                 triangulo.components.set(opacityComponent)
             }
             self.triangulo = triangulo
+            
+            let directionalLight = DirectionalLight()
+            directionalLight.shadow?.maximumDistance = 15
+            directionalLight.shadow?.depthBias = 1
+            directionalLight.look(at: [-1, 0, -1], from: [0, 20, 0], relativeTo: nil)
+
+            triangulo.addChild(directionalLight)
         }
     }
     
+    /// Adds physics to the coin and table contact surfaces, and updates the reference to larana in this model so it gets published
     func buildModel(for larana: Entity) {
-        // Add physics to the coin and table contact surfaces
         buildCoin(in: larana)
         buildContactSurfaces(inLarana: larana)
-
-        // Update the reference to larana in this model so it gets published
         self.larana = larana
     }
     
