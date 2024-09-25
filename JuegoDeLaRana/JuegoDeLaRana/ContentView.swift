@@ -10,13 +10,35 @@ import RealityKit
 import TipKit
 
 struct ContentView : View {
-    @ObservedObject var viewModel: LaRanaViewModel = LaRanaViewModel()
+    @ObservedObject var viewModel: LaRanaViewModel
+    @State var cameraMode = ARView.CameraMode.nonAR
+    
+    init(viewModel: LaRanaViewModel = LaRanaViewModel()) {
+        self.viewModel = viewModel
+        cameraMode = viewModel.cameraMode
+    }
     
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
                 ARViewContainer(viewModel: viewModel)
-                Header(for: geometry)
+                VStack {
+                    Header(for: geometry)
+                    Picker("Mode", selection: $cameraMode) {
+                        Text("VR").tag(ARView.CameraMode.nonAR).font(.title)
+                        Text("AR").tag(ARView.CameraMode.ar).font(.title)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: Constants.pickerWidth)
+                    .onChange(of: cameraMode) {
+                        viewModel.cameraMode = cameraMode
+                        
+                        // Make sure the state change worked, if not, reset to what the viewModel gets from the entities
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            cameraMode = viewModel.cameraMode
+                        }
+                    }
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .edgesIgnoringSafeArea(.all)
@@ -82,6 +104,7 @@ struct ContentView : View {
     
     private struct Constants {
         static let maxHeaderWidth: CGFloat = 420
+        static let pickerWidth: CGFloat = 96
         static let headerFontName = "Moderna"
         static let headerTopPadding: CGFloat = 56
         static let headerBottomPadding: CGFloat = 12

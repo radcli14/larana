@@ -16,13 +16,13 @@ private func getNewAnchor(for width: Float) -> AnchorEntity {
 
 class ARViewEntities: NSObject, ARSessionDelegate {
     
-    //var arView = ARView(frame: .zero)
-    var arView = ARView(frame: .zero, cameraMode: .nonAR, automaticallyConfigureSession: true)
+    var arView: ARView // = ARView(frame: .zero, cameraMode: .nonAR, automaticallyConfigureSession: true)
     
     var audioResources: AudioResources?
 
     // Entities
     var triangulo: Entity?
+    var vrCameraAnchor: AnchorEntity?
     var anchor: AnchorEntity?
     var floor: ModelEntity?
     var occluder: ModelEntity?
@@ -45,10 +45,91 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     let coinGroup = CollisionGroup(rawValue: 1 << 1)
     let generalGroup = CollisionGroup(rawValue: 1 << 2)
     
-    override init() {
+    init(cameraMode: ARView.CameraMode = .nonAR) {
+        arView = ARView(frame: .zero, cameraMode: cameraMode, automaticallyConfigureSession: true)
         super.init()
         buildArView()
     }
+    
+    // MARK: - AR View Modes
+    
+    func buildArView() {
+        //arView = ARView(frame: .zero)//, cameraMode: cameraMode, automaticallyConfigureSession: false)
+        
+        // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
+        arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
+        arView.environment.sceneUnderstanding.options.insert(.occlusion)
+        arView.environment.sceneUnderstanding.options.insert(.physics)
+        // Optional: set debug options
+        //arView?.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
+    }
+    
+    /// Toggle between VR (no camera) and AR (with camera) mode
+    func toggleArCameraMode(to cameraMode: ARView.CameraMode) {
+        let modeBefore = arView.cameraMode
+        if modeBefore == .nonAR && cameraMode == .ar {
+            deactivateVrScene()
+        } else if modeBefore == .ar && cameraMode == .nonAR {
+            activateVrScene()
+        }
+    }
+    
+    /// Activates the VR (no camera) scene, and removes the AR scene
+    func activateVrScene() {
+        guard let triangulo else {
+            print("failed to activea the VR scene because triangulo was nil")
+            return
+        }
+        
+        arView.scene.anchors.removeAll()
+        
+        let nonArAnchor = AnchorEntity(world: SIMD3<Float>())
+        setAnchor(to: nonArAnchor)
+        triangulo.setParent(nonArAnchor)
+        
+        let cameraEntity = PerspectiveCamera()
+        cameraEntity.camera.fieldOfViewInDegrees = 60
+        var cameraTransform = Transform(pitch: -0.4)
+        cameraTransform.translation = SIMD3<Float>(0, 1.75, 3)
+        vrCameraAnchor = AnchorEntity(world: cameraTransform.matrix)
+        vrCameraAnchor?.addChild(cameraEntity)
+        arView.scene.addAnchor(vrCameraAnchor!)
+        
+        let vrFadeOutTime = 2.0
+        let startTime = Date.now
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            if #available(iOS 18.0, *) {
+                if let opacity = self.triangulo?.components[OpacityComponent.self]?.opacity {
+                    self.triangulo?.components[OpacityComponent.self]?.opacity += 0.1 * (1 - opacity)
+                }
+            }
+            if Date.now.timeIntervalSince(startTime) >= vrFadeOutTime {
+                timer.invalidate()
+                self.arView.cameraMode = .nonAR
+                print("added triangulo")
+            }
+        }
+    }
+    
+    /// Deactivates the VR (no camera) scene and adds the AR (with camera) scene
+    func deactivateVrScene() {
+        hideTable()
+        self.arView.cameraMode = .ar
+        let vrFadeOutTime = 2.0
+        let startTime = Date.now
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            if #available(iOS 18.0, *) {
+                self.triangulo?.components[OpacityComponent.self]?.opacity *= 0.9
+            }
+            if Date.now.timeIntervalSince(startTime) >= vrFadeOutTime {
+                self.triangulo?.removeFromParent()
+                self.vrCameraAnchor?.removeFromParent()
+                timer.invalidate()
+                print("removed triangulo")
+            }
+        }
+    }
+    
     
     // MARK: - Setup
     
@@ -62,24 +143,15 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             self.buildFireworks()
             self.audioResources = AudioResources()
             
-            // Add the horizontal plane anchor to the scene
-            if let anchor = self.anchor {
+            if self.arView.cameraMode == .nonAR {
+                self.activateVrScene()
+            } else if let anchor = self.anchor {
+                // Add the horizontal plane anchor to the scene
                 self.arView.scene.anchors.append(anchor)
             }
             
             onComplete()
         }
-    }
-    
-    func buildArView() {
-        //arView = ARView(frame: .zero)//, cameraMode: cameraMode, automaticallyConfigureSession: false)
-        
-        // Add Scene Understanding, so that the coins bounce off the ground, tables occlude the model, etc
-        arView.environment.sceneUnderstanding.options.insert(.receivesLighting)
-        arView.environment.sceneUnderstanding.options.insert(.occlusion)
-        arView.environment.sceneUnderstanding.options.insert(.physics)
-        // Optional: set debug options
-        //arView?.debugOptions = [.showFeaturePoints, .showWorldOrigin, .showAnchorOrigins, .showSceneUnderstanding, .showPhysics]
     }
     
     /// Create a floor that sits with the anchor to visualize its location
@@ -108,23 +180,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             self.buildModel(for: larana)
         }
         
-        // TESTING: non AR mode
+        // Build the El Triangulo scene VR mode
         if let triangulo = try? Entity.load(named: "Triangulo.usdz") {
             buildContactSurfaces(inTriangulo: triangulo)
+            if #available(iOS 18.0, *) {
+                let opacityComponent = OpacityComponent(opacity: 1.0)
+                triangulo.components.set(opacityComponent)
+            }
             self.triangulo = triangulo
-            
-            let nonArAnchor = AnchorEntity(world: SIMD3<Float>())
-            setAnchor(to: nonArAnchor)
-            triangulo.setParent(nonArAnchor)
-            
-            let cameraEntity = PerspectiveCamera()
-            cameraEntity.camera.fieldOfViewInDegrees = 60
-            var cameraTransform = Transform(pitch: -0.4)
-            cameraTransform.translation = SIMD3<Float>(0, 1.75, 3)
-            let cameraAnchor = AnchorEntity(world: cameraTransform.matrix)
-            cameraAnchor.addChild(cameraEntity)
-            arView.scene.addAnchor(cameraAnchor)
-            print("did make camera")
         }
     }
     

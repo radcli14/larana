@@ -19,20 +19,21 @@ enum GameState: String {
 }
 
 class LaRanaViewModel: ObservableObject {
-    @Published var entities = ARViewEntities()
+    @Published var entities: ARViewEntities
     @Published var state: GameState = .new
     
     var cameraMode: ARView.CameraMode {
         get {
             entities.arView.cameraMode
         }
-        set {
-            // TODO: create the camera mode setter
+        set(newCameraMode) {
+            entities.toggleArCameraMode(to: newCameraMode)
         }
-    }//= .nonAR
+    }
     
-    init() {
+    init(cameraMode: ARView.CameraMode = .nonAR) {
         state = .loading
+        entities = ARViewEntities(cameraMode: cameraMode)
         entities.build {
             // When the entities have completed their build, toggle to either the resetting (AR) or play (nonAR) state depending on camera mode
             withAnimation {
