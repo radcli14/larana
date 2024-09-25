@@ -215,6 +215,12 @@ class LaRanaViewModel: ObservableObject {
         } else {
             thisHit = thisHit == .hole ? .larana : thisHit
         }
+        
+        if nHitTarget > 0 && cameraMode == .nonAR {
+            Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
+                TipForArMode.hasPlayedEnoughToGoToAr = true
+            }
+        }
 
         if let coinScore = coinHits[coin.name], thisHit.rawValue <= coinScore.rawValue {
             // The existing hit score exceeded this one, don't update

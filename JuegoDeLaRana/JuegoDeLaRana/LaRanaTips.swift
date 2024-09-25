@@ -81,3 +81,25 @@ struct TipForCoinFlick: Tip {
         [#Rule(Self.$hasToggledToPlayMode) { $0 == true }]
     }
 }
+
+/// Provides a tip suggesting the user try the AR mode
+struct TipForArMode: Tip {
+    @Parameter
+    static var hasPlayedEnoughToGoToAr: Bool = false
+    
+    var title: Text {
+        Text("Try Augmented Reality (AR)")
+    }
+    
+    var message: Text? {
+        Text("Play \"La Rana\" inside your real-world by toggling to AR mode")
+    }
+    
+    var image: Image? {
+        Image(systemName: "arkit")
+    }
+    
+    var rules: [Rule] {
+        [#Rule(Self.$hasPlayedEnoughToGoToAr) { $0 == true }]
+    }
+}

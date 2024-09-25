@@ -39,6 +39,7 @@ struct ContentView : View {
                             cameraMode = viewModel.cameraMode
                         }
                     }
+                    .popoverTip(tipForArMode)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -81,6 +82,8 @@ struct ContentView : View {
             }
         }
     }
+    
+    private let tipForArMode = TipForArMode()
     
     // MARK: - Header
     
