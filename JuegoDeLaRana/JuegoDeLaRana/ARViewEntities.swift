@@ -50,6 +50,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     init(cameraMode: ARView.CameraMode = .nonAR) {
         arView = ARView(frame: .zero, cameraMode: cameraMode, automaticallyConfigureSession: true)
+        arView.environment.lighting.resource = nil
         super.init()
 
         // Optional: set debug options
@@ -89,7 +90,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     /// Activates the VR (no camera) scene, and removes the AR scene
     func activateVrScene() {
         guard let triangulo else {
-            print("failed to activea the VR scene because triangulo was nil")
+            print("Failed to activate the VR scene because triangulo was nil")
             return
         }
         
@@ -103,7 +104,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let cameraEntity = PerspectiveCamera()
         cameraEntity.camera.fieldOfViewInDegrees = 60
         var cameraTransform = Transform(pitch: -0.4)
-        cameraTransform.translation = SIMD3<Float>(0, 1.75, 3)
+        cameraTransform.translation = SIMD3<Float>(0, 1.75, 4)
         vrCameraAnchor = AnchorEntity(world: cameraTransform.matrix)
         vrCameraAnchor?.addChild(cameraEntity)
         startTrackingDeviceMotion()
@@ -114,7 +115,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
             let t = Date.now.timeIntervalSince(startTime)
             if #available(iOS 18.0, *) {
-                if let opacity = self.triangulo?.components[OpacityComponent.self]?.opacity {
+                if let _ = self.triangulo?.components[OpacityComponent.self]?.opacity {
                     self.triangulo?.components[OpacityComponent.self]?.opacity = Float(1 - 0.5 * cos(.pi*t/vrFadeOutTime))
                 }
             }
@@ -183,6 +184,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             self.anchor = getNewAnchor(for: Constants.anchorWidth)
             self.buildFloor()
             self.loadModel()
+            self.loadTriangulo()
             self.addPointLight()
             self.buildFireworks()
             self.audioResources = AudioResources()
@@ -223,23 +225,39 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         if let larana = try? Entity.load(named: "TableAndLaRana.usdz") {
             self.buildModel(for: larana)
         }
-        
-        // Build the El Triangulo scene VR mode
-        if let triangulo = try? Entity.load(named: "Triangulo.usdz") {
-            buildContactSurfaces(inTriangulo: triangulo)
-            if #available(iOS 18.0, *) {
-                let opacityComponent = OpacityComponent(opacity: 1.0)
-                triangulo.components.set(opacityComponent)
-            }
-            self.triangulo = triangulo
-            
-            let directionalLight = DirectionalLight()
-            directionalLight.shadow?.maximumDistance = 15
-            directionalLight.shadow?.depthBias = 1
-            directionalLight.look(at: [-1, 0, -1], from: [0, 20, 0], relativeTo: nil)
-
-            triangulo.addChild(directionalLight)
+    }
+    
+    /// Build the El Triangulo scene for VR mode
+    func loadTriangulo() {
+        guard let triangulo = try? Entity.load(named: "Triangulo.usdz") else {
+            print("Failed to load the El Triangulo entity")
+            return
         }
+    
+        buildContactSurfaces(inTriangulo: triangulo)
+        
+        // Add an opacity component so that the Triangulo scene can fade in and out when switching to AR
+        if #available(iOS 18.0, *) {
+            let opacityComponent = OpacityComponent(opacity: 1.0)
+            triangulo.components.set(opacityComponent)
+        }
+
+        // Add a light that imitates the sun
+        let directionalLight = DirectionalLight()
+        directionalLight.shadow?.maximumDistance = 15
+        directionalLight.shadow?.depthBias = 1
+        directionalLight.look(at: [-1, 0, -1], from: [0, 15, 0], relativeTo: nil)
+        triangulo.addChild(directionalLight)
+        
+        // Make the ground texture be tiled
+        if let ground = triangulo.findEntity(named: "Ground_Cube") as? ModelEntity,
+           var material = ground.model?.materials.first as? PhysicallyBasedMaterial {
+            material.textureCoordinateTransform = .init(scale: SIMD2<Float>(x: 1, y: 1), rotation: 0.0)
+            ground.model?.materials[0] = material
+        }
+            
+        self.triangulo = triangulo
+            
     }
     
     /// Adds physics to the coin and table contact surfaces, and updates the reference to larana in this model so it gets published

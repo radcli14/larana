@@ -35,7 +35,7 @@ struct ContentView : View {
                         viewModel.cameraMode = cameraMode
                         
                         // Make sure the state change worked, if not, reset to what the viewModel gets from the entities
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                             cameraMode = viewModel.cameraMode
                         }
                     }
