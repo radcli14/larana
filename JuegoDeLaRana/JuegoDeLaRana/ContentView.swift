@@ -38,6 +38,13 @@ struct ContentView : View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
                             cameraMode = viewModel.cameraMode
                         }
+                        
+                        // If the user has waited a long time without setting a new anchor, point them to the button
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 6.28) {
+                            if viewModel.cameraMode == .ar && viewModel.entities.anchor == nil {
+                                TipForNewLocation.userShouldSetAnchor = true
+                            }
+                        }
                     }
                     .popoverTip(tipForArMode)
                 }
@@ -70,7 +77,7 @@ struct ContentView : View {
         .task {
             // Configure and load your tips at app launch.
             do {
-                try Tips.resetDatastore() // For debugging to make sure the tips always are displayed
+                //try Tips.resetDatastore() // For debugging to make sure the tips always are displayed
                 try Tips.configure([
                     .displayFrequency(.immediate),
                     .datastoreLocation(.applicationDefault),

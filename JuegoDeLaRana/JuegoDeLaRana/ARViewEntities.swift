@@ -80,6 +80,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     /// Toggle between VR (no camera) and AR (with camera) mode
     func toggleArCameraMode(to cameraMode: ARView.CameraMode) {
         let modeBefore = arView.cameraMode
+        stopFireworks()
         if modeBefore == .nonAR && cameraMode == .ar {
             deactivateVrScene()
         } else if modeBefore == .ar && cameraMode == .nonAR {
@@ -96,6 +97,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         removeSceneUnderstanding()
         arView.scene.anchors.removeAll()
+        anchor = nil
         
         let nonArAnchor = AnchorEntity(world: SIMD3<Float>())
         setAnchor(to: nonArAnchor)
@@ -143,7 +145,9 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             }
             if t >= vrFadeOutTime {
                 self.triangulo?.removeFromParent()
-                self.vrCameraAnchor?.removeFromParent()
+                //self.vrCameraAnchor?.removeFromParent()
+                self.arView.scene.anchors.removeAll()
+                self.anchor = nil
                 timer.invalidate()
                 print("removed triangulo")
             }
@@ -181,7 +185,7 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     
     func build(onComplete: @escaping () -> Void) {
         DispatchQueue.main.async {
-            self.anchor = getNewAnchor(for: Constants.anchorWidth)
+            //self.anchor = getNewAnchor(for: Constants.anchorWidth)
             self.buildFloor()
             self.loadModel()
             self.loadTriangulo()
@@ -205,10 +209,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         // Generate the floor, which is created as a `ModelEntity` so that it satisfies `HasCollision` which is used for dragging the table
         let floorMesh = MeshResource.generatePlane(width: 0.001, depth: 0.001)
         floor = ModelEntity(mesh: floorMesh, materials: [OcclusionMaterial()])
-        if let floor, let anchor {
+        if let floor { //}, let anchor {
             floor.addPhysics(material: Materials.wood, mode: .static)
             floor.position = SIMD3<Float>()
-            anchor.addChild(floor)
+            //anchor.addChild(floor)
         }
         
         // Generate the occluder, which is a cube that obscures the table during times when you are setting a new anchor
@@ -302,7 +306,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     func buildContactSurfaces(inTriangulo triangulo: Entity) {
-        let trianguloEntities = ["Ormaetxe_Plane", "Ground_Cube"]
+        let trianguloEntities = ["Ormaetxe_Plane", "Ground_Cube",
+                                 "Ardibeltz_Plane_001", "Bizitza_Plane_004", "Xukela_Plane_005",
+                                 "Table_Cube_003", "Table_001_Cube_001", "Table_005_Cube_009", "Table_006_Cube_010",
+                                 "Barrel_Cylinder", "Barrel_001_Cylinder_002", "Barrel_002_Cylinder_003", "Barrel_003_Cylinder_004"]
         addPhysics(to: trianguloEntities, in: triangulo, material: Materials.wood, mode: .static, collisionGroup: tableGroup)
     }
     
@@ -315,14 +322,14 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             attenuationRadius: 0.5
         ))
         lightEntity.position = SIMD3<Float>(0, 0.8, 0.3)
-        lightEntity.setParent(floor ?? anchor)
+        lightEntity.setParent(floor)
     }
     
     /// Build firework entity for succesful hits of the target
     func buildFireworks() {
         fireworkEmitter = Entity()
         fireworkEmitter?.position = SIMD3<Float>(0, 0.7, 0.1)
-        fireworkEmitter?.setParent(floor ?? anchor)
+        fireworkEmitter?.setParent(floor)
         
         if #available(iOS 18.0, *) {
             var emitterComponent = ParticleEmitterComponent.Presets.fireworks
@@ -716,6 +723,13 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         
         // Stop the fireworks after a delay
         Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+            self.fireworkEmitter?.components[ParticleEmitterComponent.self]?.isEmitting = false
+        }
+    }
+    
+    /// Make sure the fireworks have stopped emitting when toggling betwene VR/AR, as that may have been causing a crash
+    func stopFireworks() {
+        if #available(iOS 18.0, *) {
             self.fireworkEmitter?.components[ParticleEmitterComponent.self]?.isEmitting = false
         }
     }

@@ -8,11 +8,41 @@
 import SwiftUI
 import TipKit
 
+/// Provides a tip suggesting the user tap the reset button to select a new anchor location
+struct TipForNewLocation: Tip {
+    @Parameter(.transient)
+    static var userShouldSetAnchor: Bool = false
+
+    var title: Text {
+        Text("Set a new location")
+    }
+
+
+    var message: Text? {
+        Text("Tap to place the game board")
+    }
+
+
+    var image: Image? {
+        Image(systemName: OverlayViewButtonType.resetAnchor.icon)
+    }
+    
+    var rules: [Rule] {
+        [#Rule(Self.$userShouldSetAnchor) { $0 == true }]
+    }
+    
+    var options: [Option] {[
+        Tips.MaxDisplayCount(1),
+        //Tips.IgnoresDisplayFrequency(true)
+    ]}
+}
+
+
 /// Provides a tip corresponding to the reset button in the overlay view
 struct TipForResetButton: Tip {
     private let resetAnchorType: OverlayViewButtonType = .resetAnchor
     
-    @Parameter
+    @Parameter(.transient)
     static var hasToggledToResetMode: Bool = false
 
     var title: Text {
@@ -32,13 +62,18 @@ struct TipForResetButton: Tip {
     var rules: [Rule] {
         [#Rule(Self.$hasToggledToResetMode) { $0 == true }]
     }
+    
+    var options: [Option] {[
+        Tips.MaxDisplayCount(1),
+        //Tips.IgnoresDisplayFrequency(true)
+    ]}
 }
 
 /// Provides a tip corresponding to the move button in the overlay view
 struct TipForMoveButton: Tip {
     private let moveType: OverlayViewButtonType = .moveTable
     
-    @Parameter
+    @Parameter(.transient)
     static var hasToggledToMoveMode: Bool = false
     
     var title: Text {
@@ -58,11 +93,16 @@ struct TipForMoveButton: Tip {
     var rules: [Rule] {
         [#Rule(Self.$hasToggledToMoveMode) { $0 == true }]
     }
+    
+    var options: [Option] {[
+        Tips.MaxDisplayCount(1),
+        //Tips.IgnoresDisplayFrequency(true)
+    ]}
 }
 
 /// Provides a tip explaining that the user should flick a coin
 struct TipForCoinFlick: Tip {
-    @Parameter
+    @Parameter(.transient)
     static var hasToggledToPlayMode: Bool = false
     
     var title: Text {
@@ -80,11 +120,16 @@ struct TipForCoinFlick: Tip {
     var rules: [Rule] {
         [#Rule(Self.$hasToggledToPlayMode) { $0 == true }]
     }
+    
+    var options: [Option] {[
+        Tips.MaxDisplayCount(1),
+        //Tips.IgnoresDisplayFrequency(true)
+    ]}
 }
 
 /// Provides a tip suggesting the user try the AR mode
 struct TipForArMode: Tip {
-    @Parameter
+    @Parameter(.transient)
     static var hasPlayedEnoughToGoToAr: Bool = false
     
     var title: Text {
@@ -102,4 +147,9 @@ struct TipForArMode: Tip {
     var rules: [Rule] {
         [#Rule(Self.$hasPlayedEnoughToGoToAr) { $0 == true }]
     }
+    
+    var options: [Option] {[
+        Tips.MaxDisplayCount(1),
+        //Tips.IgnoresDisplayFrequency(true)
+    ]}
 }

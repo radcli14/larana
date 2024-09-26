@@ -56,6 +56,15 @@ class LaRanaViewModel: ObservableObject {
         }
     }
     
+    /// Used if we want to display a tip only if the game state is still in a certain condition after a delay where the user may not know what to do
+    private func delayedTip(ifStill stateToShowTip: GameState, action: @escaping () -> Void) {
+        Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
+            if self.state == stateToShowTip {
+                action()
+            }
+        }
+    }
+    
     // MARK: - Scores
     
     @Published var nTossed = 0
@@ -91,16 +100,13 @@ class LaRanaViewModel: ObservableObject {
                 // Put the app into a state where the user will tap to update the anchor
                 entities.hideTable()
                 state = .resetting
+                delayedTip(ifStill: .resetting, action: { TipForResetButton.hasToggledToResetMode = true })
 
             } else if state == .resetting {
                 // Reset the anchor to an automatically determined position
                 if entities.resetAnchorLocation() { // Checks that the new anchor succeeded
-                    Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
-                        if self.state == .play {
-                            TipForCoinFlick.hasToggledToPlayMode = true
-                        }
-                    }
                     state = .play
+                    delayedTip(ifStill: .play, action: { TipForCoinFlick.hasToggledToPlayMode = true })
                 }
             }
         }
@@ -124,11 +130,7 @@ class LaRanaViewModel: ObservableObject {
         // Add or remove gestures from the table
         if entities.floor != nil {
             if state == .move {
-                Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
-                    if self.state == .move {
-                        TipForMoveButton.hasToggledToMoveMode = true
-                    }
-                }
+                delayedTip(ifStill: .move, action: { TipForMoveButton.hasToggledToMoveMode = true })
                 entities.addMoveGesture()
                 print("Added gestures to the floor")
             } else {
@@ -147,13 +149,9 @@ class LaRanaViewModel: ObservableObject {
         if state == .resetting {
             if entities.resetAnchorLocation(to: location) { // Checks that the new anchor succeeded
                 withAnimation {
-                    Timer.scheduledTimer(withTimeInterval: Constants.delayBeforeTip, repeats: false) { _ in
-                        if self.state == .play {
-                            TipForCoinFlick.hasToggledToPlayMode = true
-                        }
-                    }
                     state = .play
                 }
+                delayedTip(ifStill: .play, action: { TipForCoinFlick.hasToggledToPlayMode = true })
             }
         }
     }

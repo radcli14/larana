@@ -74,6 +74,7 @@ struct OverlayView: View {
     
     // MARK: - Tips
     
+    private let tipForNewLocation = TipForNewLocation()
     private let tipForReset = TipForResetButton()
     private let tipForPlay = TipForCoinFlick()
     private let tipForMove = TipForMoveButton()
@@ -144,6 +145,7 @@ struct OverlayView: View {
         OverlayButton(for: .resetAnchor) {
             onTapReset()
         }
+        .popoverTip(tipForNewLocation)
     }
     
     /// The button that will allow the user to drag the table to a new position
