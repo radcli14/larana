@@ -628,7 +628,7 @@
 				INFOPLIST_FILE = JuegoDeLaRana/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "La Rana";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Your camera will be used to play an augmented reality version of the game";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
@@ -666,7 +666,7 @@
 				INFOPLIST_FILE = JuegoDeLaRana/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "La Rana";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Your camera will be used to play an augmented reality version of the game";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = arkit;
