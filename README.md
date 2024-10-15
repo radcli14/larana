@@ -1,5 +1,9 @@
 # Juego de la Rana
-<!-- 3D Augmented Reality version of the Basque Juego de la Rana -->
+
+[![Download on the App Store](https://i0.wp.com/www.dc-engineer.com/wp-content/uploads/2024/01/appstorebadge.png)](https://apps.apple.com/sg/app/juego-de-la-rana/id6680199511)
+
+[Check out the official website](https://www.dc-engineer.com/juego-de-la-rana/)
+
 [Join the beta test on iOS](https://testflight.apple.com/join/3b6ujPfg)
 
 🐸 The Basque "Juego de la Rana" ("Igel Jokoa" in Euskera, or simply "Frog Game") is a popular tavern game where one must attempt to throw a metal disc into the mouth of a brass frog statue. 
