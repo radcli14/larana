@@ -159,26 +159,50 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             motionManager.deviceMotionUpdateInterval = 1.0 / 60.0 // 60 Hz refresh rate
             motionManager.startDeviceMotionUpdates(to: .main) { (motion, error) in
                 if let motion = motion {
-                    self.updateCameraTransform(with: motion)
+                    self.updateVirtualCameraTransform(with: motion)
                 }
             }
         }
     }
 
-    func updateCameraTransform(with motion: CMDeviceMotion) {
+    private var virtualCameraAdjustmentQuaternion = simd_quatf(ix: 0, iy: 0, iz: 0,  r: 1)
+    
+    /// For Virtual Reality (VR) mode, we have a simulated "virtual" camera.
+    /// We want that simulated camera to respond to the device's movement, to give the impression that it is a real camera.
+    /// This function gathers the device orienation at the current instant, and makes the necessary adjustments to the virtual camera.
+    /// - Parameters:
+    ///   - motion: Core Motion of the device
+    func updateVirtualCameraTransform(with motion: CMDeviceMotion) {
+        // Get the device attitude quaternion and orientation (landscape v. portrait) at this instant
         let attitude = motion.attitude
-        let coreMotionQuaternion = simd_quatf(ix: Float(attitude.quaternion.x),
-                                              iy: Float(attitude.quaternion.y),
-                                              iz: Float(attitude.quaternion.z),
-                                              r: Float(attitude.quaternion.w))
+        let orientation = UIDevice.current.orientation
+        
+        // When the device is in landscape mode, the horizontal "x" axis is actually the device's "negative-y" axis.
+        // Make these adjustments here using the ternary operator in the creation of ix and iy
+        let r = Float(attitude.quaternion.w)
+        let ix = Float(orientation.isLandscape ? -attitude.quaternion.y : attitude.quaternion.x)
+        let iy = Float(orientation.isLandscape ? attitude.quaternion.x : attitude.quaternion.y)
+        let iz = Float(attitude.quaternion.z)
+        let coreMotionQuaternion = simd_quatf(ix: ix, iy: iy, iz: iz,  r: r)
         
         // Correction quaternion to adjust for the coordinate system difference between CoreMotion and RealityKit
-        let correctionQuaternion = simd_quatf(angle: -.pi / 2, axis: SIMD3<Float>(1, 0, 0))
-
+        var correctionQuaternion = simd_quatf(angle: -.pi / 2, axis: SIMD3<Float>(1, 0, 0))
+        if orientation.isLandscape {
+            correctionQuaternion *= simd_quatf(angle: -.pi / 2, axis: SIMD3<Float>(0, 0, 1))
+        }
+        
         // Apply the correction to the quaternion
-        let adjustedQuaternion = correctionQuaternion * coreMotionQuaternion
+        let adjustedQuaternion = correctionQuaternion * coreMotionQuaternion * virtualCameraAdjustmentQuaternion
 
         vrCameraAnchor?.children.first?.transform.rotation = adjustedQuaternion
+        
+        // Adjust the camera so it will gradually point back to the target
+        let adj_angle = adjustedQuaternion.angle > .pi ? adjustedQuaternion.angle - 2 * .pi : adjustedQuaternion.angle
+        let adj_ix = adjustedQuaternion.axis.x
+        let adj_iy = adjustedQuaternion.axis.y
+        let adj_iz = adjustedQuaternion.axis.z
+        let axis = SIMD3<Float>(adj_ix, adj_iy, adj_iz)
+        virtualCameraAdjustmentQuaternion *= simd_quatf(angle: -0.01*adj_angle, axis: axis)
     }
     
     // MARK: - Setup
@@ -254,11 +278,11 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         triangulo.addChild(directionalLight)
         
         // Make the ground texture be tiled
-        if let ground = triangulo.findEntity(named: "Ground_Cube") as? ModelEntity,
+        /*if let ground = triangulo.findEntity(named: "Ground_Cube") as? ModelEntity,
            var material = ground.model?.materials.first as? PhysicallyBasedMaterial {
             material.textureCoordinateTransform = .init(scale: SIMD2<Float>(x: 1, y: 1), rotation: 0.0)
             ground.model?.materials[0] = material
-        }
+        }*/
             
         self.triangulo = triangulo
             
@@ -306,10 +330,10 @@ class ARViewEntities: NSObject, ARSessionDelegate {
     }
     
     func buildContactSurfaces(inTriangulo triangulo: Entity) {
-        let trianguloEntities = ["Ormaetxe_Plane", "Ground_Cube",
-                                 "Ardibeltz_Plane_001", "Bizitza_Plane_004", "Xukela_Plane_005",
-                                 "Table_Cube_003", "Table_001_Cube_001", "Table_005_Cube_009", "Table_006_Cube_010",
-                                 "Barrel_Cylinder", "Barrel_001_Cylinder_002", "Barrel_002_Cylinder_003", "Barrel_003_Cylinder_004"]
+        let trianguloEntities = ["Ormaetxe", "Plane",
+                                 "Ardibeltz", "Bizitza", "Xukela",
+                                 "Table", "Table_001", "Table_005", "Table_006",
+                                 "Barrel", "Barrel_001", "Barrel_002", "Barrel_003"]
         addPhysics(to: trianguloEntities, in: triangulo, material: Materials.wood, mode: .static, collisionGroup: tableGroup)
     }
     
