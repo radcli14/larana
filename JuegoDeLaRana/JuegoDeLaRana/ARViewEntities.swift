@@ -9,6 +9,7 @@ import Foundation
 import ARKit
 import RealityKit
 import CoreMotion
+import Combine
 
 /// Provide a horizontal plane anchor for the content
 private func getNewAnchor(for width: Float) -> AnchorEntity {
@@ -164,18 +165,53 @@ class ARViewEntities: NSObject, ARSessionDelegate {
             }
         }
     }
-
+    
+    // MARK: - Virtual Camera
+    
+    private var orientation: UIDeviceOrientation {
+        UIDevice.current.orientation
+    }
+    
+    /// Stores the last device attitude in case we want to use that to update the virtual camera
+    private var attitude: CMAttitude?
+    
+    /// Stores a quaternion intended to use to assure the camera is centered on the table in the VR view
     private var virtualCameraAdjustmentQuaternion = simd_quatf(ix: 0, iy: 0, iz: 0,  r: 1)
     
-    /// For Virtual Reality (VR) mode, we have a simulated "virtual" camera.
-    /// We want that simulated camera to respond to the device's movement, to give the impression that it is a real camera.
-    /// This function gathers the device orienation at the current instant, and makes the necessary adjustments to the virtual camera.
-    /// - Parameters:
-    ///   - motion: Core Motion of the device
-    func updateVirtualCameraTransform(with motion: CMDeviceMotion) {
-        // Get the device attitude quaternion and orientation (landscape v. portrait) at this instant
-        let attitude = motion.attitude
-        let orientation = UIDevice.current.orientation
+    /// Animates the `virtualCameraAdjustmentQuaternion` so that the camera is pointed at the table in the VR view
+    func updateVirtualCameraAdjustmentQuaternion(duration: Double = 0.5) {
+        print("updateVirtualCameraAdjustmentQuaternion")
+        guard let targetRotation = correctedCoreMotionQuaternion?.inverse else {
+            print("Failed getting device attitude in updateVirtualCameraAdjustmentQuaternion")
+            return
+        }
+        
+        let startRotation = virtualCameraAdjustmentQuaternion
+        
+        var cancellable: Cancellable?
+        let startTime = Date()
+
+        cancellable = vrCameraAnchor?.scene?.subscribe(to: SceneEvents.Update.self, { event in
+            let elapsedTime = Date().timeIntervalSince(startTime)
+            let t = min(elapsedTime / duration, 1.0)
+            let progress = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t // easeInOut equation
+
+            // Spherically interpolate between start and target rotation
+            self.virtualCameraAdjustmentQuaternion = simd_slerp(startRotation, targetRotation, Float(progress))
+
+            if progress >= 1.0 {
+                cancellable?.cancel()
+            }
+        })
+    }
+    
+    /// Provides a quaternion associated with the instantaneous device orientation, with rotation for landscape vs portrait modes
+    private var coreMotionQuaternion: simd_quatf? {
+        // Get the device attitude quaternion and orientation (landscape vs portrait) at this instant
+        guard let attitude else {
+            print("Failed getting device attitude in updateVirtualCameraTransform")
+            return nil
+        }
         
         // When the device is in landscape mode, the horizontal "x" axis is actually the device's "negative-y" axis.
         // Make these adjustments here using the ternary operator in the creation of ix and iy
@@ -183,26 +219,44 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         let ix = Float(orientation.isLandscape ? -attitude.quaternion.y : attitude.quaternion.x)
         let iy = Float(orientation.isLandscape ? attitude.quaternion.x : attitude.quaternion.y)
         let iz = Float(attitude.quaternion.z)
-        let coreMotionQuaternion = simd_quatf(ix: ix, iy: iy, iz: iz,  r: r)
-        
-        // Correction quaternion to adjust for the coordinate system difference between CoreMotion and RealityKit
+        return simd_quatf(ix: ix, iy: iy, iz: iz,  r: r)
+    }
+    
+    /// Correction quaternion to adjust for the coordinate system difference between CoreMotion and RealityKit
+    private var correctionQuaternion: simd_quatf {
         var correctionQuaternion = simd_quatf(angle: -.pi / 2, axis: SIMD3<Float>(1, 0, 0))
         if orientation.isLandscape {
             correctionQuaternion *= simd_quatf(angle: -.pi / 2, axis: SIMD3<Float>(0, 0, 1))
         }
-        
-        // Apply the correction to the quaternion
-        let adjustedQuaternion = correctionQuaternion * coreMotionQuaternion * virtualCameraAdjustmentQuaternion
-
-        vrCameraAnchor?.children.first?.transform.rotation = adjustedQuaternion
-        
-        // Adjust the camera so it will gradually point back to the target
-        let adj_angle = adjustedQuaternion.angle > .pi ? adjustedQuaternion.angle - 2 * .pi : adjustedQuaternion.angle
-        let adj_ix = adjustedQuaternion.axis.x
-        let adj_iy = adjustedQuaternion.axis.y
-        let adj_iz = adjustedQuaternion.axis.z
-        let axis = SIMD3<Float>(adj_ix, adj_iy, adj_iz)
-        virtualCameraAdjustmentQuaternion *= simd_quatf(angle: -0.01*adj_angle, axis: axis)
+        return correctionQuaternion
+    }
+    
+    private var correctedCoreMotionQuaternion: simd_quatf? {
+        guard let coreMotionQuaternion else {
+            print("Failed getting device attitude in correctedCoreMotionQuaternion")
+            return nil
+        }
+        return correctionQuaternion * coreMotionQuaternion
+    }
+    
+    private var adjustedQuaternion: simd_quatf? {
+        guard let correctedCoreMotionQuaternion else {
+            print("Failed getting device attitude in adjustedQuaternion")
+            return nil
+        }
+        return correctedCoreMotionQuaternion * virtualCameraAdjustmentQuaternion
+    }
+    
+    /// For Virtual Reality (VR) mode, we have a simulated "virtual" camera.
+    /// We want that simulated camera to respond to the device's movement, to give the impression that it is a real camera.
+    /// This function gathers the device orienation at the current instant, and makes the necessary adjustments to the virtual camera.
+    /// - Parameters:
+    ///   - motion: Core Motion of the device
+    func updateVirtualCameraTransform(with motion: CMDeviceMotion) {
+        attitude = motion.attitude
+        if let adjustedQuaternion {
+            vrCameraAnchor?.children.first?.transform.rotation = adjustedQuaternion
+        }
     }
     
     // MARK: - Setup
@@ -485,16 +539,18 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         var velocity = velocity
         if let target = anchor.findEntity(named: "target") {
             let cameraTransformFromTarget = getCameraTransformRelativeTo(entity: target)
-            let distanceToTarget = cameraTransformFromTarget.translation.magnitude
-            
-            // ubar is the speed we would need to reach the target in horizontal and vertical coordinate
-            // if they were both equal, in other words, v = ubar * i + ubar * j
-            let ubar = sqrt(0.5 * 9.8 * distanceToTarget)
+
+            // Calculate initial velocity needed to hit target given the vector distance to the target and initial angle
+            let d = cameraTransformFromTarget.translation.z // horizontal distance to target
+            let h = -cameraTransformFromTarget.translation.y // vertical distance to target
+            let g: Float = 9.8
+            let theta = Constants.initialLaunchAngle
+            let v0 = sqrt(2) * d * sqrt(g / (d*sin(2*theta) - h*cos(2*theta) - h))
 
             // This weight is the amount we should trust the "flick" velocity
-            let weight = Float(0.15)
-            velocity.y = weight * velocity.y + (1 - weight) * ubar
-            velocity.z = weight * velocity.z - (1 - weight) * ubar
+            let weight = Constants.userFlickVelocityWeight
+            velocity.y = weight * velocity.y + (1 - weight) * v0 * sin(theta)
+            velocity.z = weight * velocity.z - (1 - weight) * v0 * cos(theta)
         }
 
         // Set a new PhysicsMotionComponent to add initial velocity, and randomize angular velocity
@@ -765,6 +821,8 @@ class ARViewEntities: NSObject, ARSessionDelegate {
         static let anchorHeight: Float = 0.02
         static let laranaHeight: Float = 0.9
         static let coinName = "coin"
+        static let initialLaunchAngle: Float = .pi / 6
+        static let userFlickVelocityWeight: Float = 0.2
         static let angularRateRange = Float(-50)...Float(50)
         static let initialTextPosition = SIMD3<Float>(0, 0.15, 0)
         static let textScale: Float = 6.28

@@ -37,6 +37,7 @@ struct ARViewContainer: UIViewRepresentable {
             setupCollisionHandling()
         }
         
+        /// Sends the tap gesture to the view model, which will pass the location of the tap to the ARView to check whether it is a valid surface, and spawn the table at that location in the 3D view
         @objc func handleTapGesture(_ gesture: UITapGestureRecognizer) {
             if gesture.state == .ended {
                 let location = gesture.location(in: gesture.view)
@@ -44,6 +45,7 @@ struct ARViewContainer: UIViewRepresentable {
             }
         }
         
+        //
         @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
             if gesture.state == .ended {
                 let location = gesture.location(in: gesture.view)

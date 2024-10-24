@@ -79,36 +79,15 @@ class LaRanaViewModel: ObservableObject {
 
     // MARK: - Button Intents
     
-    /// Handle the user tapping on the reset button in the overlay view by either putting the game in `.resetting` mode where they can choose a
-    /// new table position, or getting an automatically generated anchor and placing the table before toggling to `.play` mode.
+    /// Handle the user tapping on the reset button in the overlay view by either
+    /// 1. updating the virtual camera orientation if in nonAR mode
+    /// 2. putting the game in `.resetting` mode where they can choose a new table position
+    /// 3. getting an automatically generated anchor and placing the table before toggling to `.play` mode.
     func resetAnchor() {
-        // Only respond to taps on the reset button when in AR mode
         if cameraMode == .nonAR {
-            if state == .resetting || state == .move {
-                state = .play
-            }
-            return
-        }
-        
-        withAnimation {
-            // Make sure flick gestures are removed if currently in move state, will switch to resetting state
-            if state == .move {
-                toggleMove()
-            }
-            
-            if state == .play {
-                // Put the app into a state where the user will tap to update the anchor
-                entities.hideTable()
-                state = .resetting
-                delayedTip(ifStill: .resetting, action: { TipForResetButton.hasToggledToResetMode = true })
-
-            } else if state == .resetting {
-                // Reset the anchor to an automatically determined position
-                if entities.resetAnchorLocation() { // Checks that the new anchor succeeded
-                    state = .play
-                    delayedTip(ifStill: .play, action: { TipForCoinFlick.hasToggledToPlayMode = true })
-                }
-            }
+            updateVirtualCameraAdjustmentQuaternion()
+        } else {
+            updateStateForResetAnchorInARMode()
         }
     }
 
@@ -136,6 +115,42 @@ class LaRanaViewModel: ObservableObject {
             } else {
                 entities.removeMoveGesture()
                 print("Removed gestures from the floor")
+            }
+        }
+    }
+    
+    private func updateStateForResetAnchorInARMode() {
+        withAnimation {
+            // Make sure flick gestures are removed if currently in move state, will switch to resetting state
+            if state == .move {
+                toggleMove()
+            }
+            
+            if state == .play {
+                // Put the app into a state where the user will tap to update the anchor
+                entities.hideTable()
+                state = .resetting
+                delayedTip(ifStill: .resetting, action: { TipForResetButton.hasToggledToResetMode = true })
+
+            } else if state == .resetting {
+                // Reset the anchor to an automatically determined position
+                if entities.resetAnchorLocation() { // Checks that the new anchor succeeded
+                    state = .play
+                    delayedTip(ifStill: .play, action: { TipForCoinFlick.hasToggledToPlayMode = true })
+                }
+            }
+        }
+    }
+    
+    private func updateVirtualCameraAdjustmentQuaternion() {
+        let duration = Constants.durationForVirtualCameraUpdate
+        withAnimation {
+            state = .resetting
+        }
+        entities.updateVirtualCameraAdjustmentQuaternion(duration: duration)
+        Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
+            withAnimation {
+                self.state = .play
             }
         }
     }
@@ -276,6 +291,7 @@ class LaRanaViewModel: ObservableObject {
         static let flickThreshold: CGFloat = -1000
         static let pixelToMeterPerSec: Float = 0.001
         static let delayBeforeTip: Double = 3
+        static let durationForVirtualCameraUpdate = 1.0
     }
 }
 
